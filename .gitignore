@@ -1,0 +1,71 @@
+# =========================
+# Flutter / Dart / Pub
+# =========================
+.dart_tool/
+.packages
+.pub/
+.pub-cache/
+build/
+
+# Flutter plugin files
+.flutter-plugins
+.flutter-plugins-dependencies
+
+# Generated files
+**/doc/api/
+**/ios/Flutter/.last_build_id
+
+# =========================
+# Android
+# =========================
+android/.gradle/
+android/app/build/
+android/app/debug/
+android/app/profile/
+android/app/release/
+android/local.properties
+
+# Keystore (VERY IMPORTANT - never commit)
+android/key.properties
+*.jks
+*.keystore
+
+# =========================
+# iOS
+# =========================
+ios/Pods/
+ios/.symlinks/
+ios/Flutter/Flutter.framework
+ios/Flutter/Flutter.podspec
+
+# =========================
+# IDE / Editors
+# =========================
+.idea/
+*.iml
+*.ipr
+*.iws
+
+.vscode/
+
+# =========================
+# System files
+# =========================
+.DS_Store
+Thumbs.db
+
+# =========================
+# Logs & temp
+# =========================
+*.log
+*.tmp
+*.swp
+*.lock
+
+# =========================
+# Misc
+# =========================
+*.class
+*.pyc
+.history/
+.svn/

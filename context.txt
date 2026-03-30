@@ -1,0 +1,42 @@
+Project: Lingowave
+Date: March 17, 2026
+
+Workspace Structure Overview:
+- analysis_options.yaml
+- lingowave.iml
+- pubspec.yaml
+- README.md
+- android/
+- assets/
+- build/
+- ios/
+- lib/
+- linux/
+- macos/
+- test/
+- web/
+- windows/
+
+Main Dart files:
+- lib/main.dart
+- lib/data/chapter1_data.dart
+- lib/home/chapter_detail_screen.dart
+- lib/home/home_screen.dart
+- lib/home/lesson_screen.dart
+- lib/models/lesson_model.dart
+- lib/screens/home_screen.dart
+- lib/screens/onboarding_screen.dart
+- lib/screens/quiz_screen.dart
+- lib/screens/score_screen.dart
+- lib/screens/splash_screen.dart
+- lib/services/progress_service.dart
+- lib/theme/app_theme.dart
+- lib/widgets/chapter_card.dart
+- lib/widgets/common_widgets.dart
+- lib/widgets/lesson_tile.dart
+- lib/widgets/xp_bar.dart
+
+Test file:
+- test/widget_test.dart
+
+Purpose: This file provides a summary of the project structure and key files for context sharing between chats.
