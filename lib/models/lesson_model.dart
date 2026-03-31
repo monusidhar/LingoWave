@@ -18,9 +18,13 @@
 enum LessonType {
   alphabets, vowelsConsonants, greetings, manners, time, daysMonths,
   numbers, punctuation, contractions, chapterQuiz,
-  ch2Sentences, ch2SentenceTypes1, ch2SentenceTypes2, ch2ThreeParts,
-  ch2VerbTypes, ch2SubjectTypes, ch2ThisThat, ch2LivingNonLiving,
-  ch2BothAll, ch2Phrases, ch2States, ch2ChapterQuiz,
+   ch02SentenceTypes,  // L1 — Sentence Types (Classification 1 & 2)
+  ch02SVO,            // L2 — Subject, Verb & Object
+  ch02Pronouns,       // L3 — Pronouns & This/That/These/Those
+  ch02Apostrophe,     // L4 — Apostrophe 's
+  ch02Phrases,        // L5 — Key Phrases: Both/All + Common + Prepositions
+  ch02Adjectives,     // L6 — Adjectives & States (18 states)
+  ch02ChapterQuiz,    // L7 — Chapter Final Quiz (60 XP)
   ch3Intro, ch3VowelEI, ch3VowelOU, ch3SoundsSH, ch3SoundsJZ, ch3ChapterQuiz,
   ch4Ex1, ch4Ex2, ch4Ex3, ch4Ex4, ch4Ex5, ch4ChapterQuiz,
   ch5WHBasics, ch5HowCombos, ch5WhomWhere, ch5WhichWhose, ch5WHPhrases, ch5ChapterQuiz,

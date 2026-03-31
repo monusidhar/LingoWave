@@ -6,6 +6,18 @@ import '../models/lesson_model.dart';
 ///   chapter_{chapterId}_lesson_{lessonId}_status  → int (0=locked,1=inProgress,2=completed)
 ///   chapter_{chapterId}_lesson_{lessonId}_xp      → int
 class ProgressService {
+  /// Reset all XP, lesson, and chapter progress (for fresh start)
+  static Future<void> resetAllProgress() async {
+    final prefs = await SharedPreferences.getInstance();
+    // Remove all XP, lesson status, and chapter status keys
+    final keys = prefs.getKeys().where((k) => k.startsWith(_prefix)).toList();
+    for (final k in keys) {
+      if (k.contains('_xp') || k == _totalXpKey || k.contains('_status')) {
+        await prefs.remove(k);
+      }
+    }
+  }
+
   static const String _prefix = 'lw_';
 
   // ─── Keys ──────────────────────────────────────────────────────────────────

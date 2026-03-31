@@ -61,7 +61,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         index: _navIndex,
         children: [
           _buildHomeTab(),
-          _buildPracticeTab(),
           _buildProgressTab(),
           _buildProfileTab(),
         ],
@@ -72,9 +71,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
   Widget _buildHomeTab() {
     final activeLesson = _chapters[0].lessons.firstWhere(
-      (l) => l.status == LessonStatus.inProgress,
-      orElse: () => _chapters[0].lessons.first,
-    );
+          (l) => l.status == LessonStatus.inProgress,
+          orElse: () => _chapters[0].lessons.first,
+        );
 
     return CustomScrollView(
       slivers: [
@@ -99,8 +98,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 child: SafeArea(
                   bottom: false,
                   child: Padding(
-                    padding: const EdgeInsets.fromLTRB(
-                        AppSpacing.lg, AppSpacing.md, AppSpacing.lg, AppSpacing.xl),
+                    padding: const EdgeInsets.fromLTRB(AppSpacing.lg,
+                        AppSpacing.md, AppSpacing.lg, AppSpacing.xl),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -134,23 +133,23 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                             Row(
                               children: [
                                 StreakBadge(streak: 7),
-                                const SizedBox(width: AppSpacing.sm),
-                                GestureDetector(
-                                  onTap: () => setState(() => _navIndex = 3),
-                                  child: Container(
-                                    width: 40,
-                                    height: 40,
-                                    decoration: BoxDecoration(
-                                      color: Colors.white.withOpacity(0.2),
-                                      shape: BoxShape.circle,
-                                    ),
-                                    child: const Icon(
-                                      Icons.person_rounded,
-                                      color: Colors.white,
-                                      size: 20,
-                                    ),
-                                  ),
-                                ),
+                                // const SizedBox(width: AppSpacing.sm),
+                                // GestureDetector(
+                                //   onTap: () => setState(() => _navIndex = 3),
+                                //   child: Container(
+                                //     width: 40,
+                                //     height: 40,
+                                //     decoration: BoxDecoration(
+                                //       color: Colors.white.withOpacity(0.2),
+                                //       shape: BoxShape.circle,
+                                //     ),
+                                //     child: const Icon(
+                                //       Icons.person_rounded,
+                                //       color: Colors.white,
+                                //       size: 20,
+                                //     ),
+                                //   ),
+                                // ),
                               ],
                             ),
                           ],
@@ -213,7 +212,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             ),
           ),
         ),
-
         const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.lg)),
 
         // ── Continue Card ────────────────────────────────────────────────────
@@ -311,8 +309,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
         // ── Section Title ────────────────────────────────────────────────────
         SliverPadding(
-          padding:
-              const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
           sliver: SliverToBoxAdapter(
             child: Text(
               'आपकी यात्रा',
@@ -325,8 +322,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
         // ── Chapter Cards ────────────────────────────────────────────────────
         SliverPadding(
-          padding:
-              const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
           sliver: SliverList(
             delegate: SliverChildBuilderDelegate(
               (context, i) => ChapterCard(
@@ -366,13 +362,17 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               style: AppTextStyles.bodyMedium,
             ),
             const SizedBox(height: AppSpacing.xl),
-            _buildPracticeCard('📝', 'वर्तनी अभ्यास', 'Spelling Practice', AppColors.primary),
+            _buildPracticeCard(
+                '📝', 'वर्तनी अभ्यास', 'Spelling Practice', AppColors.primary),
             const SizedBox(height: AppSpacing.md),
-            _buildPracticeCard('🎧', 'सुनने का अभ्यास', 'Listening Practice', AppColors.accent),
+            _buildPracticeCard('🎧', 'सुनने का अभ्यास', 'Listening Practice',
+                AppColors.accent),
             const SizedBox(height: AppSpacing.md),
-            _buildPracticeCard('💬', 'वाक्य बनाएं', 'Sentence Building', AppColors.success),
+            _buildPracticeCard(
+                '💬', 'वाक्य बनाएं', 'Sentence Building', AppColors.success),
             const SizedBox(height: AppSpacing.md),
-            _buildPracticeCard('🔄', 'अनुवाद अभ्यास', 'Translation Practice', Color(0xFF7C3AED)),
+            _buildPracticeCard('🔄', 'अनुवाद अभ्यास', 'Translation Practice',
+                Color(0xFF7C3AED)),
           ],
         ),
       ),
@@ -397,7 +397,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               color: color.withOpacity(0.1),
               borderRadius: BorderRadius.circular(AppRadius.md),
             ),
-            child: Center(child: Text(emoji, style: const TextStyle(fontSize: 24))),
+            child: Center(
+                child: Text(emoji, style: const TextStyle(fontSize: 24))),
           ),
           const SizedBox(width: AppSpacing.md),
           Expanded(
@@ -405,7 +406,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(hi, style: AppTextStyles.labelLarge),
-                Text(en, style: AppTextStyles.bodyMedium.copyWith(fontSize: 12, color: color)),
+                Text(en,
+                    style: AppTextStyles.bodyMedium
+                        .copyWith(fontSize: 12, color: color)),
               ],
             ),
           ),
@@ -431,6 +434,15 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   }
 
   Widget _buildProgressTab() {
+    // Calculate dynamic stats
+    final completedLessons = _chapters.fold<int>(
+        0,
+        (sum, c) =>
+            sum +
+            c.lessons.where((l) => l.status == LessonStatus.completed).length);
+    // For streak, you may want to use a real calculation; here, fallback to 1 if not available
+    final streak = 1; // TODO: Replace with real streak logic if available
+    final level = (_totalXP / _levelXP).floor() + 1;
     return SafeArea(
       child: Padding(
         padding: const EdgeInsets.all(AppSpacing.lg),
@@ -482,15 +494,18 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             Row(
               children: [
                 Expanded(
-                  child: _buildStatCard('🔥', '7', 'दिन की स्ट्रीक', AppColors.accent),
+                  child: _buildStatCard('🔥', streak.toString(),
+                      'दिन की स्ट्रीक', AppColors.accent),
                 ),
                 const SizedBox(width: AppSpacing.md),
                 Expanded(
-                  child: _buildStatCard('📖', '2', 'पाठ पूरे', AppColors.success),
+                  child: _buildStatCard('📖', completedLessons.toString(),
+                      'पाठ पूरे', AppColors.success),
                 ),
                 const SizedBox(width: AppSpacing.md),
                 Expanded(
-                  child: _buildStatCard('⭐', 'स्तर 2', 'वर्तमान', AppColors.accentGold),
+                  child: _buildStatCard(
+                      '⭐', 'स्तर $level', 'वर्तमान', AppColors.accentGold),
                 ),
               ],
             ),
@@ -561,13 +576,18 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             Text(widget.userName, style: AppTextStyles.displayMedium),
             Text(
               'LingoWave शिक्षार्थी',
-              style: AppTextStyles.bodyMedium.copyWith(color: AppColors.primary),
+              style:
+                  AppTextStyles.bodyMedium.copyWith(color: AppColors.primary),
             ),
             const SizedBox(height: AppSpacing.xl),
-            _buildProfileItem(Icons.star_rounded, 'स्तर 2', 'Level 2', AppColors.accentGold),
-            _buildProfileItem(Icons.local_fire_department_rounded, '7 दिन स्ट्रीक', 'Daily Streak', AppColors.accent),
-            _buildProfileItem(Icons.bolt_rounded, '$_totalXP XP', 'Experience Points', AppColors.primary),
-            _buildProfileItem(Icons.book_rounded, '2 पाठ पूरे', 'Lessons Completed', AppColors.success),
+            _buildProfileItem(
+                Icons.star_rounded, 'स्तर 2', 'Level 2', AppColors.accentGold),
+            _buildProfileItem(Icons.local_fire_department_rounded,
+                '7 दिन स्ट्रीक', 'Daily Streak', AppColors.accent),
+            _buildProfileItem(Icons.bolt_rounded, '$_totalXP XP',
+                'Experience Points', AppColors.primary),
+            _buildProfileItem(Icons.book_rounded, '2 पाठ पूरे',
+                'Lessons Completed', AppColors.success),
             const SizedBox(height: AppSpacing.xl),
             Container(
               padding: const EdgeInsets.all(AppSpacing.md),
@@ -586,7 +606,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                       Text('Created by', style: AppTextStyles.bodyMedium),
                       Text(
                         'Mohit Sharma',
-                        style: AppTextStyles.labelLarge.copyWith(color: AppColors.primary),
+                        style: AppTextStyles.labelLarge
+                            .copyWith(color: AppColors.primary),
                       ),
                     ],
                   ),
@@ -599,7 +620,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     );
   }
 
-  Widget _buildProfileItem(IconData icon, String value, String label, Color color) {
+  Widget _buildProfileItem(
+      IconData icon, String value, String label, Color color) {
     return Container(
       margin: const EdgeInsets.only(bottom: AppSpacing.sm),
       padding: const EdgeInsets.all(AppSpacing.md),
@@ -625,7 +647,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(value, style: AppTextStyles.labelLarge),
-                Text(label, style: AppTextStyles.bodyMedium.copyWith(fontSize: 12)),
+                Text(label,
+                    style: AppTextStyles.bodyMedium.copyWith(fontSize: 12)),
               ],
             ),
           ),
@@ -637,7 +660,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   Widget _buildBottomNav() {
     final items = [
       {'icon': Icons.home_rounded, 'label': 'होम'},
-      {'icon': Icons.fitness_center_rounded, 'label': 'अभ्यास'},
       {'icon': Icons.bar_chart_rounded, 'label': 'प्रगति'},
       {'icon': Icons.person_rounded, 'label': 'प्रोफ़ाइल'},
     ];
@@ -668,8 +690,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 onTap: () => setState(() => _navIndex = i),
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 200),
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 16, vertical: 8),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   decoration: BoxDecoration(
                     color: active
                         ? AppColors.primary.withOpacity(0.1)
@@ -681,9 +703,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                     children: [
                       Icon(
                         item['icon'] as IconData,
-                        color: active
-                            ? AppColors.primary
-                            : AppColors.textHint,
+                        color: active ? AppColors.primary : AppColors.textHint,
                         size: 22,
                       ),
                       const SizedBox(height: 2),
@@ -692,12 +712,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                         style: TextStyle(
                           fontFamily: 'Nunito',
                           fontSize: 10,
-                          fontWeight: active
-                              ? FontWeight.w700
-                              : FontWeight.w500,
-                          color: active
-                              ? AppColors.primary
-                              : AppColors.textHint,
+                          fontWeight:
+                              active ? FontWeight.w700 : FontWeight.w500,
+                          color:
+                              active ? AppColors.primary : AppColors.textHint,
                         ),
                       ),
                     ],

@@ -67,78 +67,240 @@ class Chapter1Data {
                 titleHindi: 'स्वर और व्यंजन',
                 emoji: '🗣️',
                 type: LessonType.vowelsConsonants,
-                status: LessonStatus.inProgress),
+                status: LessonStatus.locked,
+                xpEarned: 0),
             LessonModel(
                 id: 3,
                 title: 'Greetings',
                 titleHindi: 'अभिवादन',
                 emoji: '👋',
                 type: LessonType.greetings,
-                status: LessonStatus.inProgress),
+                status: LessonStatus.locked,
+                xpEarned: 0),
             LessonModel(
                 id: 4,
                 title: 'Manners',
                 titleHindi: 'शिष्टाचार',
                 emoji: '🙏',
                 type: LessonType.manners,
-                status: LessonStatus.inProgress),
+                status: LessonStatus.locked,
+                xpEarned: 0),
             LessonModel(
                 id: 5,
                 title: 'Days & Months',
                 titleHindi: 'दिन और महीने',
                 emoji: '📅',
                 type: LessonType.daysMonths,
-                status: LessonStatus.inProgress),
+                status: LessonStatus.inProgress,
+                xpEarned: 0),
             LessonModel(
                 id: 6,
                 title: 'Numbers',
                 titleHindi: 'संख्याएँ',
                 emoji: '🔢',
                 type: LessonType.numbers,
-                status: LessonStatus.inProgress),
+                status: LessonStatus.inProgress,
+                xpEarned: 0),
             LessonModel(
                 id: 7,
                 title: 'Telling Time',
                 titleHindi: 'समय बताना',
                 emoji: '🕐',
                 type: LessonType.time,
-                status: LessonStatus.inProgress),
+                status: LessonStatus.inProgress,
+                xpEarned: 0),
             LessonModel(
                 id: 8,
                 title: 'Punctuation',
                 titleHindi: 'विराम चिह्न',
                 emoji: '✍️',
                 type: LessonType.punctuation,
-                status: LessonStatus.inProgress),
+                status: LessonStatus.inProgress,
+                xpEarned: 0),
             LessonModel(
                 id: 9,
                 title: 'Contractions',
                 titleHindi: 'संकुचन',
                 emoji: '🔗',
                 type: LessonType.contractions,
-                status: LessonStatus.inProgress),
-            LessonModel(id: 10, title: 'Conversation 10 — Employee & Employer', titleHindi: 'वार्तालाप 10 — कर्मचारी और नियोक्ता', emoji: '💼', type: LessonType.ch41Conv10, status: LessonStatus.inProgress, totalXP: 20),
-            LessonModel(id: 11, title: 'Conversation 11 — Family Search', titleHindi: 'वार्तालाप 11 — परिवार की खोज', emoji: '🔍', type: LessonType.ch41Conv11, status: LessonStatus.inProgress, totalXP: 20),
-            LessonModel(id: 12, title: 'Conversation 12 — Rakhi Celebration', titleHindi: 'वार्तालाप 12 — राखी उत्सव', emoji: '🎀', type: LessonType.ch41Conv12, status: LessonStatus.inProgress, totalXP: 20),
-            LessonModel(id: 13, title: 'Conversation 13 — Book Money', titleHindi: 'वार्तालाप 13 — किताबों के पैसे', emoji: '📖', type: LessonType.ch41Conv13, status: LessonStatus.inProgress, totalXP: 20),
-            LessonModel(id: 14, title: 'Conversation 14 — Placement Discussion', titleHindi: 'वार्तालाप 14 — प्लेसमेंट चर्चा', emoji: '🎯', type: LessonType.ch41Conv14, status: LessonStatus.inProgress, totalXP: 20),
-            LessonModel(id: 15, title: 'Conversation 15 — Bus Travel', titleHindi: 'वार्तालाप 15 — बस यात्रा', emoji: '🚌', type: LessonType.ch41Conv15, status: LessonStatus.inProgress, totalXP: 20),
-            LessonModel(id: 16, title: 'Conversation 16 — Old Friend', titleHindi: 'वार्तालाप 16 — पुराना दोस्त', emoji: '📞', type: LessonType.ch41Conv16, status: LessonStatus.inProgress, totalXP: 20),
-            LessonModel(id: 17, title: 'Conversation 17 — Bank Loan', titleHindi: 'वार्तालाप 17 — बैंक लोन', emoji: '🏦', type: LessonType.ch41Conv17, status: LessonStatus.inProgress, totalXP: 20),
-            LessonModel(id: 18, title: 'Conversation 18 — Bus Conductor', titleHindi: 'वार्तालाप 18 — बस कंडक्टर', emoji: '🎫', type: LessonType.ch41Conv18, status: LessonStatus.inProgress, totalXP: 20),
-            LessonModel(id: 19, title: 'Conversation 19 — Manager & Employee', titleHindi: 'वार्तालाप 19 — प्रबंधक और कर्मचारी', emoji: '👔', type: LessonType.ch41Conv19, status: LessonStatus.inProgress, totalXP: 20),
-            LessonModel(id: 20, title: 'Conversation 20 — Shopping for Suit', titleHindi: 'वार्तालाप 20 — सूट खरीदारी', emoji: '👗', type: LessonType.ch41Conv20, status: LessonStatus.inProgress, totalXP: 20),
-            LessonModel(id: 21, title: 'Conversation 21 — Morning Routine', titleHindi: 'वार्तालाप 21 — सुबह की दिनचर्या', emoji: '🌅', type: LessonType.ch41Conv21, status: LessonStatus.inProgress, totalXP: 20),
-            LessonModel(id: 22, title: 'Conversation 22 — Classroom Training', titleHindi: 'वार्तालाप 22 — कक्षा प्रशिक्षण', emoji: '📝', type: LessonType.ch41Conv22, status: LessonStatus.inProgress, totalXP: 20),
-            LessonModel(id: 23, title: 'Conversation 23 — Doctor Visit 2', titleHindi: 'वार्तालाप 23 — डॉक्टर के पास 2', emoji: '🩺', type: LessonType.ch41Conv23, status: LessonStatus.inProgress, totalXP: 20),
-            LessonModel(id: 24, title: 'Conversation 24 — Job Hunt', titleHindi: 'वार्तालाप 24 — नौकरी की तलाश', emoji: '💼', type: LessonType.ch41Conv24, status: LessonStatus.inProgress, totalXP: 20),
-            LessonModel(id: 25, title: 'Conversation 25 — Interview Prep', titleHindi: 'वार्तालाप 25 — साक्षात्कार की तैयारी', emoji: '🎤', type: LessonType.ch41Conv25, status: LessonStatus.inProgress, totalXP: 20),
-            LessonModel(id: 26, title: 'Conversation 26 — Social Media', titleHindi: 'वार्तालाप 26 — सोशल मीडिया', emoji: '📱', type: LessonType.ch41Conv26, status: LessonStatus.inProgress, totalXP: 20),
-            LessonModel(id: 27, title: 'Conversation 27 — Reunion', titleHindi: 'वार्तालाप 27 — पुनर्मिलन', emoji: '🤝', type: LessonType.ch41Conv27, status: LessonStatus.inProgress, totalXP: 20),
-            LessonModel(id: 28, title: 'Conversation 28 — Sick Day', titleHindi: 'वार्तालाप 28 — बीमारी का दिन', emoji: '🤒', type: LessonType.ch41Conv28, status: LessonStatus.inProgress, totalXP: 20),
-            LessonModel(id: 29, title: 'Conversation 29 — Job Referral', titleHindi: 'वार्तालाप 29 — नौकरी के लिए सिफारिश', emoji: '⭐', type: LessonType.ch41Conv29, status: LessonStatus.inProgress, totalXP: 20),
-            LessonModel(id: 30, title: 'Conversation 30 — Party Meeting', titleHindi: 'वार्तालाप 30 — पार्टी में मुलाकात', emoji: '🎉', type: LessonType.ch41Conv30, status: LessonStatus.inProgress, totalXP: 20),
-            LessonModel(id: 31, title: 'Chapter Quiz', titleHindi: 'अध्याय क्विज़', emoji: '🏆', type: LessonType.ch41ChapterQuiz, status: LessonStatus.inProgress, totalXP: 100),
+                status: LessonStatus.inProgress,
+                xpEarned: 0),
+            LessonModel(
+                id: 10,
+                title: 'Conversation 10 — Employee & Employer',
+                titleHindi: 'वार्तालाप 10 — कर्मचारी और नियोक्ता',
+                emoji: '💼',
+                type: LessonType.ch41Conv10,
+                status: LessonStatus.inProgress,
+                totalXP: 20),
+            LessonModel(
+                id: 11,
+                title: 'Conversation 11 — Family Search',
+                titleHindi: 'वार्तालाप 11 — परिवार की खोज',
+                emoji: '🔍',
+                type: LessonType.ch41Conv11,
+                status: LessonStatus.inProgress,
+                totalXP: 20),
+            LessonModel(
+                id: 12,
+                title: 'Conversation 12 — Rakhi Celebration',
+                titleHindi: 'वार्तालाप 12 — राखी उत्सव',
+                emoji: '🎀',
+                type: LessonType.ch41Conv12,
+                status: LessonStatus.inProgress,
+                totalXP: 20),
+            LessonModel(
+                id: 13,
+                title: 'Conversation 13 — Book Money',
+                titleHindi: 'वार्तालाप 13 — किताबों के पैसे',
+                emoji: '📖',
+                type: LessonType.ch41Conv13,
+                status: LessonStatus.inProgress,
+                totalXP: 20),
+            LessonModel(
+                id: 14,
+                title: 'Conversation 14 — Placement Discussion',
+                titleHindi: 'वार्तालाप 14 — प्लेसमेंट चर्चा',
+                emoji: '🎯',
+                type: LessonType.ch41Conv14,
+                status: LessonStatus.inProgress,
+                totalXP: 20),
+            LessonModel(
+                id: 15,
+                title: 'Conversation 15 — Bus Travel',
+                titleHindi: 'वार्तालाप 15 — बस यात्रा',
+                emoji: '🚌',
+                type: LessonType.ch41Conv15,
+                status: LessonStatus.inProgress,
+                totalXP: 20),
+            LessonModel(
+                id: 16,
+                title: 'Conversation 16 — Old Friend',
+                titleHindi: 'वार्तालाप 16 — पुराना दोस्त',
+                emoji: '📞',
+                type: LessonType.ch41Conv16,
+                status: LessonStatus.inProgress,
+                totalXP: 20),
+            LessonModel(
+                id: 17,
+                title: 'Conversation 17 — Bank Loan',
+                titleHindi: 'वार्तालाप 17 — बैंक लोन',
+                emoji: '🏦',
+                type: LessonType.ch41Conv17,
+                status: LessonStatus.inProgress,
+                totalXP: 20),
+            LessonModel(
+                id: 18,
+                title: 'Conversation 18 — Bus Conductor',
+                titleHindi: 'वार्तालाप 18 — बस कंडक्टर',
+                emoji: '🎫',
+                type: LessonType.ch41Conv18,
+                status: LessonStatus.inProgress,
+                totalXP: 20),
+            LessonModel(
+                id: 19,
+                title: 'Conversation 19 — Manager & Employee',
+                titleHindi: 'वार्तालाप 19 — प्रबंधक और कर्मचारी',
+                emoji: '👔',
+                type: LessonType.ch41Conv19,
+                status: LessonStatus.inProgress,
+                totalXP: 20),
+            LessonModel(
+                id: 20,
+                title: 'Conversation 20 — Shopping for Suit',
+                titleHindi: 'वार्तालाप 20 — सूट खरीदारी',
+                emoji: '👗',
+                type: LessonType.ch41Conv20,
+                status: LessonStatus.inProgress,
+                totalXP: 20),
+            LessonModel(
+                id: 21,
+                title: 'Conversation 21 — Morning Routine',
+                titleHindi: 'वार्तालाप 21 — सुबह की दिनचर्या',
+                emoji: '🌅',
+                type: LessonType.ch41Conv21,
+                status: LessonStatus.inProgress,
+                totalXP: 20),
+            LessonModel(
+                id: 22,
+                title: 'Conversation 22 — Classroom Training',
+                titleHindi: 'वार्तालाप 22 — कक्षा प्रशिक्षण',
+                emoji: '📝',
+                type: LessonType.ch41Conv22,
+                status: LessonStatus.inProgress,
+                totalXP: 20),
+            LessonModel(
+                id: 23,
+                title: 'Conversation 23 — Doctor Visit 2',
+                titleHindi: 'वार्तालाप 23 — डॉक्टर के पास 2',
+                emoji: '🩺',
+                type: LessonType.ch41Conv23,
+                status: LessonStatus.inProgress,
+                totalXP: 20),
+            LessonModel(
+                id: 24,
+                title: 'Conversation 24 — Job Hunt',
+                titleHindi: 'वार्तालाप 24 — नौकरी की तलाश',
+                emoji: '💼',
+                type: LessonType.ch41Conv24,
+                status: LessonStatus.inProgress,
+                totalXP: 20),
+            LessonModel(
+                id: 25,
+                title: 'Conversation 25 — Interview Prep',
+                titleHindi: 'वार्तालाप 25 — साक्षात्कार की तैयारी',
+                emoji: '🎤',
+                type: LessonType.ch41Conv25,
+                status: LessonStatus.inProgress,
+                totalXP: 20),
+            LessonModel(
+                id: 26,
+                title: 'Conversation 26 — Social Media',
+                titleHindi: 'वार्तालाप 26 — सोशल मीडिया',
+                emoji: '📱',
+                type: LessonType.ch41Conv26,
+                status: LessonStatus.inProgress,
+                totalXP: 20),
+            LessonModel(
+                id: 27,
+                title: 'Conversation 27 — Reunion',
+                titleHindi: 'वार्तालाप 27 — पुनर्मिलन',
+                emoji: '🤝',
+                type: LessonType.ch41Conv27,
+                status: LessonStatus.inProgress,
+                totalXP: 20),
+            LessonModel(
+                id: 28,
+                title: 'Conversation 28 — Sick Day',
+                titleHindi: 'वार्तालाप 28 — बीमारी का दिन',
+                emoji: '🤒',
+                type: LessonType.ch41Conv28,
+                status: LessonStatus.inProgress,
+                totalXP: 20),
+            LessonModel(
+                id: 29,
+                title: 'Conversation 29 — Job Referral',
+                titleHindi: 'वार्तालाप 29 — नौकरी के लिए सिफारिश',
+                emoji: '⭐',
+                type: LessonType.ch41Conv29,
+                status: LessonStatus.inProgress,
+                totalXP: 20),
+            LessonModel(
+                id: 30,
+                title: 'Conversation 30 — Party Meeting',
+                titleHindi: 'वार्तालाप 30 — पार्टी में मुलाकात',
+                emoji: '🎉',
+                type: LessonType.ch41Conv30,
+                status: LessonStatus.inProgress,
+                totalXP: 20),
+            LessonModel(
+                id: 31,
+                title: 'Chapter Quiz',
+                titleHindi: 'अध्याय क्विज़',
+                emoji: '🏆',
+                type: LessonType.ch41ChapterQuiz,
+                status: LessonStatus.inProgress,
+                totalXP: 100),
           ],
         ),
         Chapter2Data.chapter,
@@ -182,8 +344,8 @@ class Chapter1Data {
         Chapter40Data.chapter,
         Chapter41Data.chapter,
         Chapter42Data.chapter,
-         Chapter44Data.chapter,
-         Chapter45Data.chapter,
+        Chapter44Data.chapter,
+        Chapter45Data.chapter,
       ];
 
   static List<QuizQuestion> questionsForLesson(LessonType type) {
@@ -208,29 +370,19 @@ class Chapter1Data {
         return contractionQuestions;
       case LessonType.chapterQuiz:
         return chapterFinalQuestions;
-      case LessonType.ch2Sentences:
-        return Chapter2Data.sentenceQuestions;
-      case LessonType.ch2SentenceTypes1:
-        return Chapter2Data.sentenceTypes1Questions;
-      case LessonType.ch2SentenceTypes2:
-        return Chapter2Data.sentenceTypes2Questions;
-      case LessonType.ch2ThreeParts:
-        return Chapter2Data.affirmativeNegativeQuestions;
-      case LessonType.ch2VerbTypes:
+      case LessonType.ch02SentenceTypes:
+        return Chapter2Data.sentenceTypesQuestions;
+      case LessonType.ch02SVO:
+        return Chapter2Data.svoQuestions;
+      case LessonType.ch02Pronouns:
+        return Chapter2Data.pronounsQuestions;
+      case LessonType.ch02Apostrophe:
         return Chapter2Data.apostropheQuestions;
-      case LessonType.ch2SubjectTypes:
-        return Chapter2Data.subjectVerbObjectQuestions;
-      case LessonType.ch2ThisThat:
-        return Chapter2Data.singularPluralQuestions;
-      case LessonType.ch2LivingNonLiving:
-        return Chapter2Data.thisThatQuestions;
-      case LessonType.ch2BothAll:
-        return Chapter2Data.bothAllQuestions;
-      case LessonType.ch2Phrases:
+      case LessonType.ch02Phrases:
         return Chapter2Data.phrasesQuestions;
-      case LessonType.ch2States:
-        return Chapter2Data.statesQuestions;
-      case LessonType.ch2ChapterQuiz:
+      case LessonType.ch02Adjectives:
+        return Chapter2Data.adjectivesQuestions;
+      case LessonType.ch02ChapterQuiz:
         return Chapter2Data.chapterFinalQuestions;
       case LessonType.ch3Intro:
         return Chapter3Data.introVowelAQuestions;
@@ -668,98 +820,190 @@ class Chapter1Data {
         return Chapter34Data.set5Questions;
       case LessonType.ch34ChapterQuiz:
         return Chapter34Data.chapterFinalQuestions;
-      case LessonType.ch35Polite:       return Chapter35Data.politeQuestions;
-      case LessonType.ch35Questions1:   return Chapter35Data.questions1Quiz;
-      case LessonType.ch35Questions2:   return Chapter35Data.questions2Quiz;
-      case LessonType.ch35Emotions:     return Chapter35Data.emotionsQuestions;
-      case LessonType.ch35Complex:      return Chapter35Data.complexQuestions;
-      case LessonType.ch35ChapterQuiz:  return Chapter35Data.chapterFinalQuestions;
-       case LessonType.ch36Verbs1:       return Chapter36Data.verbs1Questions;
-        case LessonType.ch36Verbs2:       return Chapter36Data.verbs2Questions;
-        case LessonType.ch36Articles1:    return Chapter36Data.articles1Questions;
-        case LessonType.ch36Articles2:    return Chapter36Data.articles2Questions;
-        case LessonType.ch36Prep1:        return Chapter36Data.prep1Questions;
-        case LessonType.ch36Prep2:        return Chapter36Data.prep2Questions;
-        case LessonType.ch36ChapterQuiz:  return Chapter36Data.chapterFinalQuestions;
-        case LessonType.ch37Ex1A:        return Chapter37Data.ex1AQuestions;
-        case LessonType.ch37Ex1B:        return Chapter37Data.ex1BQuestions;
-        case LessonType.ch37Ex2A:        return Chapter37Data.ex2AQuestions;
-        case LessonType.ch37Ex2B:        return Chapter37Data.ex2BQuestions;
-        case LessonType.ch37ChapterQuiz: return Chapter37Data.chapterFinalQuestions;
-        case LessonType.ch38Set1:         return Chapter38Data.set1Questions;
-        case LessonType.ch38Set2:         return Chapter38Data.set2Questions;
-        case LessonType.ch38Set3:         return Chapter38Data.set3Questions;
-        case LessonType.ch38ChapterQuiz:  return Chapter38Data.chapterFinalQuestions;
-        case LessonType.ch39Test1:        return Chapter39Data.test1Questions;
-        case LessonType.ch39Test2:        return Chapter39Data.test2Questions;
-        case LessonType.ch39Test3:        return Chapter39Data.test3Questions;
-        case LessonType.ch39Test4:        return Chapter39Data.test4Questions;
-        case LessonType.ch39ChapterQuiz:  return Chapter39Data.chapterFinalQuestions;
-        case LessonType.ch40EnToHi1:      return Chapter40Data.enToHi1Questions;
-      case LessonType.ch40EnToHi2:      return Chapter40Data.enToHi2Questions;
-        case LessonType.ch40HiToEn1:      return Chapter40Data.hiToEn1Questions;
-      case LessonType.ch40HiToEn2:      return Chapter40Data.hiToEn2Questions;
-      case LessonType.ch40ChapterQuiz:  return Chapter40Data.chapterFinalQuestions;
-         case LessonType.ch41Conv1:        return Chapter41Data.conv1Questions;
-        case LessonType.ch41Conv2:        return Chapter41Data.conv2Questions;
-        case LessonType.ch41Conv3:        return Chapter41Data.conv3Questions;
-        case LessonType.ch41Conv4:        return Chapter41Data.conv4Questions;
-        case LessonType.ch41Conv5:        return Chapter41Data.conv5Questions;
-        case LessonType.ch41Conv6:        return Chapter41Data.conv6Questions;
-        case LessonType.ch41Conv7:        return Chapter41Data.conv7Questions;
-        case LessonType.ch41Conv8:        return Chapter41Data.conv8Questions;
-        case LessonType.ch41Conv9:        return Chapter41Data.conv9Questions;
-    case LessonType.ch41Conv10: return Chapter41Data.conv10Questions;
-    case LessonType.ch41Conv11: return Chapter41Data.conv11Questions;
-    case LessonType.ch41Conv12: return Chapter41Data.conv12Questions;
-    case LessonType.ch41Conv13: return Chapter41Data.conv13Questions;
-    case LessonType.ch41Conv14: return Chapter41Data.conv14Questions;
-    case LessonType.ch41Conv15: return Chapter41Data.conv15Questions;
-    case LessonType.ch41Conv16: return Chapter41Data.conv16Questions;
-    case LessonType.ch41Conv17: return Chapter41Data.conv17Questions;
-    case LessonType.ch41Conv18: return Chapter41Data.conv18Questions;
-    case LessonType.ch41Conv19: return Chapter41Data.conv19Questions;
-    case LessonType.ch41Conv20: return Chapter41Data.conv20Questions;
-    case LessonType.ch41Conv21: return Chapter41Data.conv21Questions;
-    case LessonType.ch41Conv22: return Chapter41Data.conv22Questions;
-    case LessonType.ch41Conv23: return Chapter41Data.conv23Questions;
-    case LessonType.ch41Conv24: return Chapter41Data.conv24Questions;
-    case LessonType.ch41Conv25: return Chapter41Data.conv25Questions;
-    case LessonType.ch41Conv26: return Chapter41Data.conv26Questions;
-    case LessonType.ch41Conv27: return Chapter41Data.conv27Questions;
-    case LessonType.ch41Conv28: return Chapter41Data.conv28Questions;
-    case LessonType.ch41Conv29: return Chapter41Data.conv29Questions;
-    case LessonType.ch41Conv30: return Chapter41Data.conv30Questions;
-    case LessonType.ch41ChapterQuiz: return Chapter41Data.chapterFinalQuestions;
-      case LessonType.ch42Passages1:    return Chapter42Data.passages1Questions;
-      case LessonType.ch42Passages2:    return Chapter42Data.passages2Questions;
-      case LessonType.ch42ChapterQuiz:  return Chapter42Data.chapterFinalQuestions;
-       case LessonType.ch43Intro:        return Chapter43Data.introQuestions;
-        case LessonType.ch43IdiomsA:      return Chapter43Data.idiomsAQuestions;
-        case LessonType.ch43IdiomsB:      return Chapter43Data.idiomsBQuestions;
-        case LessonType.ch43IdiomsC:      return Chapter43Data.idiomsCQuestions;
-        case LessonType.ch43Proverbs:     return Chapter43Data.proverbsQuestions;
-        case LessonType.ch43ChapterQuiz:  return Chapter43Data.chapterFinalQuestions;
-         case LessonType.ch44Tips:         return Chapter44Data.tipsQuestions;
-        case LessonType.ch44Interview1:   return Chapter44Data.interview1Questions;
-        case LessonType.ch44Interview2:   return Chapter44Data.interview2Questions;
-        case LessonType.ch44Interview3:   return Chapter44Data.interview3Questions;
-        case LessonType.ch44Interview4:   return Chapter44Data.interview4Questions;
-        case LessonType.ch44Interview5:   return Chapter44Data.interview5Questions;
-        case LessonType.ch44Interview6:   return Chapter44Data.interview6Questions;
-        case LessonType.ch44Phrases:      return Chapter44Data.phrasesQuestions;
-        case LessonType.ch44Mock:         return Chapter44Data.mockQuizQuestions;
-        case LessonType.ch44ChapterQuiz:  return Chapter44Data.chapterFinalQuestions;
-           case LessonType.ch45DictAE:      return Chapter45Data.dictAEQuestions;
-        case LessonType.ch45DictFJ:      return Chapter45Data.dictFJQuestions;
-        case LessonType.ch45DictKO:      return Chapter45Data.dictKOQuestions;
-        case LessonType.ch45DictPS:      return Chapter45Data.dictPSQuestions;
-        case LessonType.ch45DictTZ:      return Chapter45Data.dictTZQuestions;
-        case LessonType.ch45POS:         return Chapter45Data.posQuestions;
-        case LessonType.ch45QuizEN:      return Chapter45Data.quizEnHiQuestions;
-        case LessonType.ch45QuizHI:      return Chapter45Data.quizHiEnQuestions;
-        case LessonType.ch45QuizPOS:     return Chapter45Data.quizPosQuestions;
-        case LessonType.ch45ChapterQuiz: return Chapter45Data.chapterFinalQuestions;
+      case LessonType.ch35Polite:
+        return Chapter35Data.politeQuestions;
+      case LessonType.ch35Questions1:
+        return Chapter35Data.questions1Quiz;
+      case LessonType.ch35Questions2:
+        return Chapter35Data.questions2Quiz;
+      case LessonType.ch35Emotions:
+        return Chapter35Data.emotionsQuestions;
+      case LessonType.ch35Complex:
+        return Chapter35Data.complexQuestions;
+      case LessonType.ch35ChapterQuiz:
+        return Chapter35Data.chapterFinalQuestions;
+      case LessonType.ch36Verbs1:
+        return Chapter36Data.verbs1Questions;
+      case LessonType.ch36Verbs2:
+        return Chapter36Data.verbs2Questions;
+      case LessonType.ch36Articles1:
+        return Chapter36Data.articles1Questions;
+      case LessonType.ch36Articles2:
+        return Chapter36Data.articles2Questions;
+      case LessonType.ch36Prep1:
+        return Chapter36Data.prep1Questions;
+      case LessonType.ch36Prep2:
+        return Chapter36Data.prep2Questions;
+      case LessonType.ch36ChapterQuiz:
+        return Chapter36Data.chapterFinalQuestions;
+      case LessonType.ch37Ex1A:
+        return Chapter37Data.ex1AQuestions;
+      case LessonType.ch37Ex1B:
+        return Chapter37Data.ex1BQuestions;
+      case LessonType.ch37Ex2A:
+        return Chapter37Data.ex2AQuestions;
+      case LessonType.ch37Ex2B:
+        return Chapter37Data.ex2BQuestions;
+      case LessonType.ch37ChapterQuiz:
+        return Chapter37Data.chapterFinalQuestions;
+      case LessonType.ch38Set1:
+        return Chapter38Data.set1Questions;
+      case LessonType.ch38Set2:
+        return Chapter38Data.set2Questions;
+      case LessonType.ch38Set3:
+        return Chapter38Data.set3Questions;
+      case LessonType.ch38ChapterQuiz:
+        return Chapter38Data.chapterFinalQuestions;
+      case LessonType.ch39Test1:
+        return Chapter39Data.test1Questions;
+      case LessonType.ch39Test2:
+        return Chapter39Data.test2Questions;
+      case LessonType.ch39Test3:
+        return Chapter39Data.test3Questions;
+      case LessonType.ch39Test4:
+        return Chapter39Data.test4Questions;
+      case LessonType.ch39ChapterQuiz:
+        return Chapter39Data.chapterFinalQuestions;
+      case LessonType.ch40EnToHi1:
+        return Chapter40Data.enToHi1Questions;
+      case LessonType.ch40EnToHi2:
+        return Chapter40Data.enToHi2Questions;
+      case LessonType.ch40HiToEn1:
+        return Chapter40Data.hiToEn1Questions;
+      case LessonType.ch40HiToEn2:
+        return Chapter40Data.hiToEn2Questions;
+      case LessonType.ch40ChapterQuiz:
+        return Chapter40Data.chapterFinalQuestions;
+      case LessonType.ch41Conv1:
+        return Chapter41Data.conv1Questions;
+      case LessonType.ch41Conv2:
+        return Chapter41Data.conv2Questions;
+      case LessonType.ch41Conv3:
+        return Chapter41Data.conv3Questions;
+      case LessonType.ch41Conv4:
+        return Chapter41Data.conv4Questions;
+      case LessonType.ch41Conv5:
+        return Chapter41Data.conv5Questions;
+      case LessonType.ch41Conv6:
+        return Chapter41Data.conv6Questions;
+      case LessonType.ch41Conv7:
+        return Chapter41Data.conv7Questions;
+      case LessonType.ch41Conv8:
+        return Chapter41Data.conv8Questions;
+      case LessonType.ch41Conv9:
+        return Chapter41Data.conv9Questions;
+      case LessonType.ch41Conv10:
+        return Chapter41Data.conv10Questions;
+      case LessonType.ch41Conv11:
+        return Chapter41Data.conv11Questions;
+      case LessonType.ch41Conv12:
+        return Chapter41Data.conv12Questions;
+      case LessonType.ch41Conv13:
+        return Chapter41Data.conv13Questions;
+      case LessonType.ch41Conv14:
+        return Chapter41Data.conv14Questions;
+      case LessonType.ch41Conv15:
+        return Chapter41Data.conv15Questions;
+      case LessonType.ch41Conv16:
+        return Chapter41Data.conv16Questions;
+      case LessonType.ch41Conv17:
+        return Chapter41Data.conv17Questions;
+      case LessonType.ch41Conv18:
+        return Chapter41Data.conv18Questions;
+      case LessonType.ch41Conv19:
+        return Chapter41Data.conv19Questions;
+      case LessonType.ch41Conv20:
+        return Chapter41Data.conv20Questions;
+      case LessonType.ch41Conv21:
+        return Chapter41Data.conv21Questions;
+      case LessonType.ch41Conv22:
+        return Chapter41Data.conv22Questions;
+      case LessonType.ch41Conv23:
+        return Chapter41Data.conv23Questions;
+      case LessonType.ch41Conv24:
+        return Chapter41Data.conv24Questions;
+      case LessonType.ch41Conv25:
+        return Chapter41Data.conv25Questions;
+      case LessonType.ch41Conv26:
+        return Chapter41Data.conv26Questions;
+      case LessonType.ch41Conv27:
+        return Chapter41Data.conv27Questions;
+      case LessonType.ch41Conv28:
+        return Chapter41Data.conv28Questions;
+      case LessonType.ch41Conv29:
+        return Chapter41Data.conv29Questions;
+      case LessonType.ch41Conv30:
+        return Chapter41Data.conv30Questions;
+      case LessonType.ch41ChapterQuiz:
+        return Chapter41Data.chapterFinalQuestions;
+      case LessonType.ch42Passages1:
+        return Chapter42Data.passages1Questions;
+      case LessonType.ch42Passages2:
+        return Chapter42Data.passages2Questions;
+      case LessonType.ch42ChapterQuiz:
+        return Chapter42Data.chapterFinalQuestions;
+      case LessonType.ch43Intro:
+        return Chapter43Data.introQuestions;
+      case LessonType.ch43IdiomsA:
+        return Chapter43Data.idiomsAQuestions;
+      case LessonType.ch43IdiomsB:
+        return Chapter43Data.idiomsBQuestions;
+      case LessonType.ch43IdiomsC:
+        return Chapter43Data.idiomsCQuestions;
+      case LessonType.ch43Proverbs:
+        return Chapter43Data.proverbsQuestions;
+      case LessonType.ch43ChapterQuiz:
+        return Chapter43Data.chapterFinalQuestions;
+      case LessonType.ch44Tips:
+        return Chapter44Data.tipsQuestions;
+      case LessonType.ch44Interview1:
+        return Chapter44Data.interview1Questions;
+      case LessonType.ch44Interview2:
+        return Chapter44Data.interview2Questions;
+      case LessonType.ch44Interview3:
+        return Chapter44Data.interview3Questions;
+      case LessonType.ch44Interview4:
+        return Chapter44Data.interview4Questions;
+      case LessonType.ch44Interview5:
+        return Chapter44Data.interview5Questions;
+      case LessonType.ch44Interview6:
+        return Chapter44Data.interview6Questions;
+      case LessonType.ch44Phrases:
+        return Chapter44Data.phrasesQuestions;
+      case LessonType.ch44Mock:
+        return Chapter44Data.mockQuizQuestions;
+      case LessonType.ch44ChapterQuiz:
+        return Chapter44Data.chapterFinalQuestions;
+      case LessonType.ch45DictAE:
+        return Chapter45Data.dictAEQuestions;
+      case LessonType.ch45DictFJ:
+        return Chapter45Data.dictFJQuestions;
+      case LessonType.ch45DictKO:
+        return Chapter45Data.dictKOQuestions;
+      case LessonType.ch45DictPS:
+        return Chapter45Data.dictPSQuestions;
+      case LessonType.ch45DictTZ:
+        return Chapter45Data.dictTZQuestions;
+      case LessonType.ch45POS:
+        return Chapter45Data.posQuestions;
+      case LessonType.ch45QuizEN:
+        return Chapter45Data.quizEnHiQuestions;
+      case LessonType.ch45QuizHI:
+        return Chapter45Data.quizHiEnQuestions;
+      case LessonType.ch45QuizPOS:
+        return Chapter45Data.quizPosQuestions;
+      case LessonType.ch45ChapterQuiz:
+        return Chapter45Data.chapterFinalQuestions;
     }
     return alphabetQuestions;
   }

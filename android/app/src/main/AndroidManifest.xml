@@ -31,7 +31,7 @@
         <!-- LingoWave AdMob App ID — Mohit Sharma -->
         <meta-data
             android:name="com.google.android.gms.ads.APPLICATION_ID"
-            android:value="ca-app-pub-2863444084543307~1662497928"/>
+            android:value="ca-app-pub-2863444084543307~8112751359"/>
 
     </application>
 
