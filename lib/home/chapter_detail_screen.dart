@@ -2,9 +2,7 @@ import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
 import '../models/lesson_model.dart';
 import '../widgets/common_widgets.dart';
-import '../widgets/ad_widgets.dart';
 import '../services/progress_service.dart';
-import '../services/ad_service.dart';
 import 'lesson_screen.dart';
 
 class ChapterDetailScreen extends StatefulWidget {
@@ -24,8 +22,6 @@ class ChapterDetailScreen extends StatefulWidget {
 class _ChapterDetailScreenState extends State<ChapterDetailScreen>
     with RouteAware {
   bool _loading = true;
-  bool _isUnlocked = false;
-  int _coins = 0;
 
   @override
   void initState() {
@@ -34,32 +30,15 @@ class _ChapterDetailScreenState extends State<ChapterDetailScreen>
   }
 
   /// Called every time this screen becomes visible again
+  /// (e.g., after returning from LessonScreen or QuizScreen)
   @override
   void didPopNext() {
     _loadProgress();
   }
 
   Future<void> _loadProgress() async {
-    setState(() => _loading = true);
-
-    // Chapter 1 is always free; premium users always unlocked
-    final unlocked = await AdService().isChapterUnlocked(widget.chapter.id);
-    _coins = AdService().coins;
-
     await ProgressService.loadChapterProgress(widget.chapter);
-    if (mounted) {
-      setState(() {
-        _isUnlocked = unlocked;
-        _loading = false;
-      });
-    }
-  }
-
-  void _onChapterUnlocked() {
-    setState(() {
-      _isUnlocked = true;
-      _coins = AdService().coins;
-    });
+    if (mounted) setState(() => _loading = false);
   }
 
   @override
@@ -71,7 +50,7 @@ class _ChapterDetailScreenState extends State<ChapterDetailScreen>
       backgroundColor: AppColors.bg,
       body: CustomScrollView(
         slivers: [
-          // ── App Bar ────────────────────────────────────────────────────
+          // ── App Bar ──────────────────────────────────────────────────────
           SliverAppBar(
             expandedHeight: 180,
             pinned: true,
@@ -81,16 +60,6 @@ class _ChapterDetailScreenState extends State<ChapterDetailScreen>
                   color: Colors.white),
               onPressed: () => Navigator.pop(context),
             ),
-            // ── Coin badge in AppBar (free users only) ─────────────────
-            actions: [
-              if (!AdService().isPremium)
-                Padding(
-                  padding: const EdgeInsets.only(right: AppSpacing.md),
-                  child: Center(
-                    child: CoinBadge(coins: _coins, color: Colors.white),
-                  ),
-                ),
-            ],
             flexibleSpace: FlexibleSpaceBar(
               background: Container(
                 decoration: BoxDecoration(
@@ -117,21 +86,6 @@ class _ChapterDetailScreenState extends State<ChapterDetailScreen>
                         ),
                       ),
                     ),
-                    // Lock icon shown in header when chapter is locked
-                    if (!_isUnlocked && !_loading && widget.chapter.id != 1)
-                      Positioned(
-                        top: 48,
-                        right: AppSpacing.lg,
-                        child: Container(
-                          padding: const EdgeInsets.all(8),
-                          decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.2),
-                            shape: BoxShape.circle,
-                          ),
-                          child: const Text('🔒',
-                              style: TextStyle(fontSize: 20)),
-                        ),
-                      ),
                     Positioned(
                       bottom: 20,
                       left: AppSpacing.lg,
@@ -189,24 +143,8 @@ class _ChapterDetailScreenState extends State<ChapterDetailScreen>
             const SliverFillRemaining(
               child: Center(child: CircularProgressIndicator()),
             )
-          // ── LOCKED STATE ────────────────────────────────────────────────
-          else if (!_isUnlocked && widget.chapter.id != 1)
-            SliverFillRemaining(
-              hasScrollBody: false,
-              child: Center(
-                child: SingleChildScrollView(
-                  child: ChapterLockOverlay(
-                    chapterId: widget.chapter.id,
-                    chapterTitle: widget.chapter.title,
-                    onUnlocked: _onChapterUnlocked,
-                    accentColor: color,
-                  ),
-                ),
-              ),
-            )
-          // ── UNLOCKED STATE ──────────────────────────────────────────────
           else ...[
-            // Progress Summary
+            // ── Progress Summary ──────────────────────────────────────────
             SliverToBoxAdapter(
               child: Padding(
                 padding: const EdgeInsets.all(AppSpacing.lg),
@@ -250,65 +188,73 @@ class _ChapterDetailScreenState extends State<ChapterDetailScreen>
               ),
             ),
 
-            // Lessons Header
+            // ── Lessons Header ──────────────────────────────────────────
             SliverPadding(
               padding:
                   const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
               sliver: SliverToBoxAdapter(
-                child: Text('पाठ सूची',
-                    style: AppTextStyles.headingLarge),
+                child:
+                    Text('पाठ सूची', style: AppTextStyles.headingLarge),
               ),
             ),
 
             const SliverToBoxAdapter(
                 child: SizedBox(height: AppSpacing.md)),
 
-            // Lessons List
+            // ── Lessons List — sequential unlock ────────────────────────
             SliverPadding(
               padding:
                   const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
               sliver: SliverList(
                 delegate: SliverChildBuilderDelegate(
                   (context, i) {
-                    // Lock lessons until previous is completed
                     final lessons = widget.chapter.lessons;
-                    LessonModel lesson = lessons[i];
-                    LessonStatus status = lesson.status;
+                    final lesson = lessons[i];
+
+                    // ── Compute effective lock status ─────────────────
+                    // Lesson 0 (first) is always accessible if inProgress
+                    // Lesson i is locked if lesson i-1 is NOT completed
+                    bool effectivelyLocked = false;
                     if (i > 0) {
                       final prev = lessons[i - 1];
-                      if (prev.status != LessonStatus.completed && status != LessonStatus.completed) {
-                        status = LessonStatus.locked;
+                      if (prev.status != LessonStatus.completed) {
+                        effectivelyLocked = true;
                       }
                     }
-                    // Create a copy with updated status for display
+
+                    // Build display model with effective status
+                    final displayStatus = effectivelyLocked
+                        ? LessonStatus.locked
+                        : lesson.status;
+
                     final displayLesson = LessonModel(
                       id: lesson.id,
                       title: lesson.title,
                       titleHindi: lesson.titleHindi,
                       emoji: lesson.emoji,
                       type: lesson.type,
-                      status: status,
+                      status: displayStatus,
                       totalXP: lesson.totalXP,
                       xpEarned: lesson.xpEarned,
                     );
+
                     return LessonTile(
                       lesson: displayLesson,
                       activeColor: color,
                       isLast: i == lessons.length - 1,
-                      onTap: status == LessonStatus.locked
+                      onTap: effectivelyLocked
                           ? null
                           : () async {
                               await Navigator.push(
                                 context,
                                 MaterialPageRoute(
                                   builder: (_) => LessonScreen(
-                                    lesson: lesson,
+                                    lesson: lesson, // use original model
                                     chapter: widget.chapter,
                                     accentColor: color,
                                   ),
                                 ),
                               );
-                              // Reload progress when returning from lesson
                               _loadProgress();
                             },
                     );

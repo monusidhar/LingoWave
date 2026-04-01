@@ -4,6 +4,7 @@ import '../data/chapter1_data.dart';
 import '../models/lesson_model.dart';
 import '../widgets/common_widgets.dart';
 import '../home/chapter_detail_screen.dart';
+import '../services/progress_service.dart';
 
 class HomeScreen extends StatefulWidget {
   final String userName;
@@ -17,6 +18,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   int _navIndex = 0;
   final List<ChapterModel> _chapters = Chapter1Data.chapters;
+  int _streak = 0;
 
   late AnimationController _headerAnim;
   late Animation<double> _headerFade;
@@ -29,12 +31,24 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       vsync: this,
       duration: const Duration(milliseconds: 600),
     );
-    _headerFade = CurvedAnimation(parent: _headerAnim, curve: Curves.easeOut);
+    _headerFade =
+        CurvedAnimation(parent: _headerAnim, curve: Curves.easeOut);
     _headerSlide = Tween<Offset>(
       begin: const Offset(0, -0.2),
       end: Offset.zero,
-    ).animate(CurvedAnimation(parent: _headerAnim, curve: Curves.easeOut));
+    ).animate(
+        CurvedAnimation(parent: _headerAnim, curve: Curves.easeOut));
     _headerAnim.forward();
+    _loadAll();
+  }
+
+  Future<void> _loadAll() async {
+    // Load progress for ALL chapters so lock state is fresh
+    for (final chapter in _chapters) {
+      await ProgressService.loadChapterProgress(chapter);
+    }
+    _streak = await ProgressService.loadStreak();
+    if (mounted) setState(() {});
   }
 
   @override
@@ -51,6 +65,25 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     if (hour < 12) return 'सुप्रभात 🌅';
     if (hour < 17) return 'नमस्ते ☀️';
     return 'शुभ संध्या 🌆';
+  }
+
+  /// A chapter is accessible if:
+  /// - It's chapter 1 (always open), OR
+  /// - The previous chapter in the list is fully completed
+  bool _isChapterAccessible(int listIndex) {
+    if (listIndex == 0) return true;
+    final prev = _chapters[listIndex - 1];
+    return prev.isFullyCompleted;
+  }
+
+  /// Find the active chapter — the first one that is accessible but not complete
+  int _activeChapterIndex() {
+    for (int i = 0; i < _chapters.length; i++) {
+      if (_isChapterAccessible(i) && !_chapters[i].isFullyCompleted) {
+        return i;
+      }
+    }
+    return 0;
   }
 
   @override
@@ -70,14 +103,18 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   }
 
   Widget _buildHomeTab() {
-    final activeLesson = _chapters[0].lessons.firstWhere(
-          (l) => l.status == LessonStatus.inProgress,
-          orElse: () => _chapters[0].lessons.first,
-        );
+    final activeIdx = _activeChapterIndex();
+    final activeChapter = _chapters[activeIdx];
+
+    // Find the first in-progress lesson in active chapter
+    final activeLesson = activeChapter.lessons.firstWhere(
+      (l) => l.status == LessonStatus.inProgress,
+      orElse: () => activeChapter.lessons.first,
+    );
 
     return CustomScrollView(
       slivers: [
-        // ── Header ──────────────────────────────────────────────────────────
+        // ── Header ────────────────────────────────────────────────────────
         SliverToBoxAdapter(
           child: FadeTransition(
             opacity: _headerFade,
@@ -130,28 +167,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                 ),
                               ],
                             ),
-                            Row(
-                              children: [
-                                StreakBadge(streak: 7),
-                                // const SizedBox(width: AppSpacing.sm),
-                                // GestureDetector(
-                                //   onTap: () => setState(() => _navIndex = 3),
-                                //   child: Container(
-                                //     width: 40,
-                                //     height: 40,
-                                //     decoration: BoxDecoration(
-                                //       color: Colors.white.withOpacity(0.2),
-                                //       shape: BoxShape.circle,
-                                //     ),
-                                //     child: const Icon(
-                                //       Icons.person_rounded,
-                                //       color: Colors.white,
-                                //       size: 20,
-                                //     ),
-                                //   ),
-                                // ),
-                              ],
-                            ),
+                            StreakBadge(streak: _streak),
                           ],
                         ),
                         const SizedBox(height: AppSpacing.lg),
@@ -167,7 +183,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                     BorderRadius.circular(AppRadius.full),
                               ),
                               child: Text(
-                                'स्तर 2',
+                                'स्तर ${(_totalXP / _levelXP).floor() + 1}',
                                 style: AppTextStyles.labelSmall.copyWith(
                                   color: Colors.white,
                                   fontWeight: FontWeight.w700,
@@ -176,28 +192,23 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                             ),
                             const SizedBox(width: AppSpacing.sm),
                             Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  ClipRRect(
-                                    borderRadius:
-                                        BorderRadius.circular(AppRadius.full),
-                                    child: LinearProgressIndicator(
-                                      value: _totalXP / _levelXP,
-                                      minHeight: 8,
-                                      backgroundColor:
-                                          Colors.white.withOpacity(0.2),
-                                      valueColor:
-                                          const AlwaysStoppedAnimation<Color>(
-                                              AppColors.accentGold),
-                                    ),
-                                  ),
-                                ],
+                              child: ClipRRect(
+                                borderRadius:
+                                    BorderRadius.circular(AppRadius.full),
+                                child: LinearProgressIndicator(
+                                  value: (_totalXP % _levelXP) / _levelXP,
+                                  minHeight: 8,
+                                  backgroundColor:
+                                      Colors.white.withOpacity(0.2),
+                                  valueColor:
+                                      const AlwaysStoppedAnimation<Color>(
+                                          AppColors.accentGold),
+                                ),
                               ),
                             ),
                             const SizedBox(width: AppSpacing.sm),
                             Text(
-                              '$_totalXP/$_levelXP XP',
+                              '$_totalXP XP',
                               style: AppTextStyles.labelSmall.copyWith(
                                 color: Colors.white70,
                               ),
@@ -212,22 +223,26 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             ),
           ),
         ),
+
         const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.lg)),
 
-        // ── Continue Card ────────────────────────────────────────────────────
+        // ── Continue Card ──────────────────────────────────────────────────
         SliverPadding(
           padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
           sliver: SliverToBoxAdapter(
             child: GestureDetector(
-              onTap: () => Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => ChapterDetailScreen(
-                    chapter: _chapters[0],
-                    colorIndex: 0,
+              onTap: () async {
+                await Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => ChapterDetailScreen(
+                      chapter: activeChapter,
+                      colorIndex: activeIdx,
+                    ),
                   ),
-                ),
-              ),
+                );
+                _loadAll(); // refresh after returning
+              },
               child: Container(
                 padding: const EdgeInsets.all(AppSpacing.md),
                 decoration: BoxDecoration(
@@ -258,9 +273,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
-                            'जारी रखें →',
-                            style: TextStyle(
+                          Text(
+                            'अध्याय ${activeChapter.id} — जारी रखें →',
+                            style: const TextStyle(
                               fontFamily: 'Nunito',
                               color: Colors.white70,
                               fontSize: 12,
@@ -307,37 +322,44 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
         const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.lg)),
 
-        // ── Section Title ────────────────────────────────────────────────────
+        // ── Section Title ────────────────────────────────────────────────
         SliverPadding(
           padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
           sliver: SliverToBoxAdapter(
-            child: Text(
-              'आपकी यात्रा',
-              style: AppTextStyles.headingLarge,
-            ),
+            child: Text('आपकी यात्रा', style: AppTextStyles.headingLarge),
           ),
         ),
 
         const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.md)),
 
-        // ── Chapter Cards ────────────────────────────────────────────────────
+        // ── Chapter Cards ────────────────────────────────────────────────
         SliverPadding(
           padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
           sliver: SliverList(
             delegate: SliverChildBuilderDelegate(
-              (context, i) => ChapterCard(
-                chapter: _chapters[i],
-                colorIndex: i,
-                onTap: () => Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => ChapterDetailScreen(
-                      chapter: _chapters[i],
-                      colorIndex: i,
-                    ),
-                  ),
-                ),
-              ),
+              (context, i) {
+                final accessible = _isChapterAccessible(i);
+                return ChapterCard(
+                  chapter: _chapters[i],
+                  colorIndex: i,
+                  // Force locked appearance for inaccessible chapters
+                  forceShowLocked: !accessible,
+                  onTap: accessible
+                      ? () async {
+                          await Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => ChapterDetailScreen(
+                                chapter: _chapters[i],
+                                colorIndex: i,
+                              ),
+                            ),
+                          );
+                          _loadAll(); // refresh after returning
+                        }
+                      : null,
+                );
+              },
               childCount: _chapters.length,
             ),
           ),
@@ -348,101 +370,16 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     );
   }
 
-  Widget _buildPracticeTab() {
-    return SafeArea(
-      child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.lg),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('अभ्यास', style: AppTextStyles.displayMedium),
-            const SizedBox(height: AppSpacing.sm),
-            const Text(
-              'आज का अभ्यास करें और XP कमाएं',
-              style: AppTextStyles.bodyMedium,
-            ),
-            const SizedBox(height: AppSpacing.xl),
-            _buildPracticeCard(
-                '📝', 'वर्तनी अभ्यास', 'Spelling Practice', AppColors.primary),
-            const SizedBox(height: AppSpacing.md),
-            _buildPracticeCard('🎧', 'सुनने का अभ्यास', 'Listening Practice',
-                AppColors.accent),
-            const SizedBox(height: AppSpacing.md),
-            _buildPracticeCard(
-                '💬', 'वाक्य बनाएं', 'Sentence Building', AppColors.success),
-            const SizedBox(height: AppSpacing.md),
-            _buildPracticeCard('🔄', 'अनुवाद अभ्यास', 'Translation Practice',
-                Color(0xFF7C3AED)),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildPracticeCard(String emoji, String hi, String en, Color color) {
-    return Container(
-      padding: const EdgeInsets.all(AppSpacing.md),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(AppRadius.lg),
-        border: Border.all(color: color.withOpacity(0.2)),
-        boxShadow: AppShadows.card,
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 48,
-            height: 48,
-            decoration: BoxDecoration(
-              color: color.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(AppRadius.md),
-            ),
-            child: Center(
-                child: Text(emoji, style: const TextStyle(fontSize: 24))),
-          ),
-          const SizedBox(width: AppSpacing.md),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(hi, style: AppTextStyles.labelLarge),
-                Text(en,
-                    style: AppTextStyles.bodyMedium
-                        .copyWith(fontSize: 12, color: color)),
-              ],
-            ),
-          ),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-            decoration: BoxDecoration(
-              color: color.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(AppRadius.full),
-            ),
-            child: Text(
-              'शुरू करें',
-              style: TextStyle(
-                fontFamily: 'Nunito',
-                color: color,
-                fontSize: 12,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
   Widget _buildProgressTab() {
-    // Calculate dynamic stats
     final completedLessons = _chapters.fold<int>(
         0,
         (sum, c) =>
             sum +
-            c.lessons.where((l) => l.status == LessonStatus.completed).length);
-    // For streak, you may want to use a real calculation; here, fallback to 1 if not available
-    final streak = 1; // TODO: Replace with real streak logic if available
+            c.lessons
+                .where((l) => l.status == LessonStatus.completed)
+                .length);
     final level = (_totalXP / _levelXP).floor() + 1;
+
     return SafeArea(
       child: Padding(
         padding: const EdgeInsets.all(AppSpacing.lg),
@@ -459,63 +396,51 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 ),
                 borderRadius: BorderRadius.circular(AppRadius.xl),
               ),
-              child: Column(
-                children: [
-                  const Text(
-                    'कुल XP',
+              child: Column(children: [
+                const Text('कुल XP',
                     style: TextStyle(
-                      fontFamily: 'Nunito',
-                      color: Colors.white70,
-                      fontSize: 14,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    '$_totalXP',
+                        fontFamily: 'Nunito',
+                        color: Colors.white70,
+                        fontSize: 14)),
+                const SizedBox(height: 4),
+                Text('$_totalXP',
                     style: const TextStyle(
-                      fontFamily: 'Nunito',
-                      color: Colors.white,
-                      fontSize: 56,
-                      fontWeight: FontWeight.w900,
-                    ),
-                  ),
-                  const Text(
-                    'XP Points',
+                        fontFamily: 'Nunito',
+                        color: Colors.white,
+                        fontSize: 56,
+                        fontWeight: FontWeight.w900)),
+                const Text('XP Points',
                     style: TextStyle(
-                      fontFamily: 'Nunito',
-                      color: Colors.white70,
-                      fontSize: 14,
-                    ),
-                  ),
-                ],
-              ),
+                        fontFamily: 'Nunito',
+                        color: Colors.white70,
+                        fontSize: 14)),
+              ]),
             ),
             const SizedBox(height: AppSpacing.lg),
-            Row(
-              children: [
-                Expanded(
-                  child: _buildStatCard('🔥', streak.toString(),
-                      'दिन की स्ट्रीक', AppColors.accent),
-                ),
-                const SizedBox(width: AppSpacing.md),
-                Expanded(
-                  child: _buildStatCard('📖', completedLessons.toString(),
-                      'पाठ पूरे', AppColors.success),
-                ),
-                const SizedBox(width: AppSpacing.md),
-                Expanded(
-                  child: _buildStatCard(
-                      '⭐', 'स्तर $level', 'वर्तमान', AppColors.accentGold),
-                ),
-              ],
-            ),
+            Row(children: [
+              Expanded(
+                child: _buildStatCard('🔥', '$_streak',
+                    'दिन की स्ट्रीक', AppColors.accent),
+              ),
+              const SizedBox(width: AppSpacing.md),
+              Expanded(
+                child: _buildStatCard('📖', '$completedLessons',
+                    'पाठ पूरे', AppColors.success),
+              ),
+              const SizedBox(width: AppSpacing.md),
+              Expanded(
+                child: _buildStatCard('⭐', 'स्तर $level',
+                    'वर्तमान', AppColors.accentGold),
+              ),
+            ]),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildStatCard(String emoji, String value, String label, Color color) {
+  Widget _buildStatCard(
+      String emoji, String value, String label, Color color) {
     return Container(
       padding: const EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(
@@ -523,21 +448,15 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         borderRadius: BorderRadius.circular(AppRadius.lg),
         border: Border.all(color: color.withOpacity(0.2)),
       ),
-      child: Column(
-        children: [
-          Text(emoji, style: const TextStyle(fontSize: 24)),
-          const SizedBox(height: 4),
-          Text(
-            value,
-            style: AppTextStyles.headingMedium.copyWith(color: color),
-          ),
-          Text(
-            label,
+      child: Column(children: [
+        Text(emoji, style: const TextStyle(fontSize: 24)),
+        const SizedBox(height: 4),
+        Text(value,
+            style: AppTextStyles.headingMedium.copyWith(color: color)),
+        Text(label,
             style: AppTextStyles.labelSmall,
-            textAlign: TextAlign.center,
-          ),
-        ],
-      ),
+            textAlign: TextAlign.center),
+      ]),
     );
   }
 
@@ -545,77 +464,69 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     return SafeArea(
       child: SingleChildScrollView(
         padding: const EdgeInsets.all(AppSpacing.lg),
-        child: Column(
-          children: [
-            const SizedBox(height: AppSpacing.lg),
-            Container(
-              width: 88,
-              height: 88,
-              decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  colors: [Color(0xFF4F46E5), Color(0xFF7C3AED)],
-                ),
-                shape: BoxShape.circle,
-                boxShadow: AppShadows.elevated,
-              ),
-              child: Center(
-                child: Text(
-                  widget.userName.isNotEmpty
-                      ? widget.userName[0].toUpperCase()
-                      : '👤',
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 40,
-                    fontWeight: FontWeight.w800,
-                    fontFamily: 'Nunito',
-                  ),
+        child: Column(children: [
+          const SizedBox(height: AppSpacing.lg),
+          Container(
+            width: 88,
+            height: 88,
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                  colors: [Color(0xFF4F46E5), Color(0xFF7C3AED)]),
+              shape: BoxShape.circle,
+              boxShadow: AppShadows.elevated,
+            ),
+            child: Center(
+              child: Text(
+                widget.userName.isNotEmpty
+                    ? widget.userName[0].toUpperCase()
+                    : '👤',
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 40,
+                  fontWeight: FontWeight.w800,
+                  fontFamily: 'Nunito',
                 ),
               ),
             ),
-            const SizedBox(height: AppSpacing.md),
-            Text(widget.userName, style: AppTextStyles.displayMedium),
-            Text(
-              'LingoWave शिक्षार्थी',
-              style:
-                  AppTextStyles.bodyMedium.copyWith(color: AppColors.primary),
+          ),
+          const SizedBox(height: AppSpacing.md),
+          Text(widget.userName, style: AppTextStyles.displayMedium),
+          Text('LingoWave शिक्षार्थी',
+              style: AppTextStyles.bodyMedium
+                  .copyWith(color: AppColors.primary)),
+          const SizedBox(height: AppSpacing.xl),
+          _buildProfileItem(Icons.star_rounded,
+              'स्तर ${(_totalXP / _levelXP).floor() + 1}',
+              'Current Level', AppColors.accentGold),
+          _buildProfileItem(Icons.local_fire_department_rounded,
+              '$_streak दिन स्ट्रीक', 'Daily Streak', AppColors.accent),
+          _buildProfileItem(Icons.bolt_rounded, '$_totalXP XP',
+              'Experience Points', AppColors.primary),
+          _buildProfileItem(
+              Icons.book_rounded,
+              '${_chapters.fold<int>(0, (s, c) => s + c.lessons.where((l) => l.status == LessonStatus.completed).length)} पाठ पूरे',
+              'Lessons Completed',
+              AppColors.success),
+          const SizedBox(height: AppSpacing.xl),
+          Container(
+            padding: const EdgeInsets.all(AppSpacing.md),
+            decoration: BoxDecoration(
+              color: AppColors.surface,
+              borderRadius: BorderRadius.circular(AppRadius.lg),
+              boxShadow: AppShadows.card,
             ),
-            const SizedBox(height: AppSpacing.xl),
-            _buildProfileItem(
-                Icons.star_rounded, 'स्तर 2', 'Level 2', AppColors.accentGold),
-            _buildProfileItem(Icons.local_fire_department_rounded,
-                '7 दिन स्ट्रीक', 'Daily Streak', AppColors.accent),
-            _buildProfileItem(Icons.bolt_rounded, '$_totalXP XP',
-                'Experience Points', AppColors.primary),
-            _buildProfileItem(Icons.book_rounded, '2 पाठ पूरे',
-                'Lessons Completed', AppColors.success),
-            const SizedBox(height: AppSpacing.xl),
-            Container(
-              padding: const EdgeInsets.all(AppSpacing.md),
-              decoration: BoxDecoration(
-                color: AppColors.surface,
-                borderRadius: BorderRadius.circular(AppRadius.lg),
-                boxShadow: AppShadows.card,
-              ),
-              child: Row(
-                children: [
-                  const Text('👨‍💻', style: TextStyle(fontSize: 24)),
-                  const SizedBox(width: AppSpacing.md),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text('Created by', style: AppTextStyles.bodyMedium),
-                      Text(
-                        'Mohit Sharma',
-                        style: AppTextStyles.labelLarge
-                            .copyWith(color: AppColors.primary),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
+            child: Row(children: [
+              const Text('👨‍💻', style: TextStyle(fontSize: 24)),
+              const SizedBox(width: AppSpacing.md),
+              Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                Text('Created by', style: AppTextStyles.bodyMedium),
+                Text('Mohit Sharma',
+                    style: AppTextStyles.labelLarge
+                        .copyWith(color: AppColors.primary)),
+              ]),
+            ]),
+          ),
+        ]),
       ),
     );
   }
@@ -630,30 +541,28 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         borderRadius: BorderRadius.circular(AppRadius.md),
         boxShadow: AppShadows.card,
       ),
-      child: Row(
-        children: [
-          Container(
-            width: 40,
-            height: 40,
-            decoration: BoxDecoration(
-              color: color.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(AppRadius.sm),
-            ),
-            child: Icon(icon, color: color, size: 20),
+      child: Row(children: [
+        Container(
+          width: 40,
+          height: 40,
+          decoration: BoxDecoration(
+            color: color.withOpacity(0.1),
+            borderRadius: BorderRadius.circular(AppRadius.sm),
           ),
-          const SizedBox(width: AppSpacing.md),
-          Expanded(
-            child: Column(
+          child: Icon(icon, color: color, size: 20),
+        ),
+        const SizedBox(width: AppSpacing.md),
+        Expanded(
+          child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(value, style: AppTextStyles.labelLarge),
-                Text(label,
-                    style: AppTextStyles.bodyMedium.copyWith(fontSize: 12)),
-              ],
-            ),
-          ),
-        ],
-      ),
+            Text(value, style: AppTextStyles.labelLarge),
+            Text(label,
+                style:
+                    AppTextStyles.bodyMedium.copyWith(fontSize: 12)),
+          ]),
+        ),
+      ]),
     );
   }
 
@@ -690,8 +599,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 onTap: () => setState(() => _navIndex = i),
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 200),
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 16, vertical: 8),
                   decoration: BoxDecoration(
                     color: active
                         ? AppColors.primary.withOpacity(0.1)
@@ -703,7 +612,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                     children: [
                       Icon(
                         item['icon'] as IconData,
-                        color: active ? AppColors.primary : AppColors.textHint,
+                        color: active
+                            ? AppColors.primary
+                            : AppColors.textHint,
                         size: 22,
                       ),
                       const SizedBox(height: 2),
@@ -712,10 +623,12 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                         style: TextStyle(
                           fontFamily: 'Nunito',
                           fontSize: 10,
-                          fontWeight:
-                              active ? FontWeight.w700 : FontWeight.w500,
-                          color:
-                              active ? AppColors.primary : AppColors.textHint,
+                          fontWeight: active
+                              ? FontWeight.w700
+                              : FontWeight.w500,
+                          color: active
+                              ? AppColors.primary
+                              : AppColors.textHint,
                         ),
                       ),
                     ],

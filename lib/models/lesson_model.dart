@@ -1,19 +1,3 @@
-// ── lesson_model.dart — add these new values to your existing LessonType enum ──
-//
-// Find your enum LessonType { ... } in lesson_model.dart and append the
-// following entries BEFORE the closing } of the enum:
-//
-//   ch16Intro,           // L1 — What are Simple Sentences?
-//   ch16PresentIsAmAre,  // L2 — Simple Present: Is/Am/Are
-//   ch16PresentHasHave,  // L3 — Simple Present: Has/Have
-//   ch16PastWasWere,     // L4 — Simple Past: Was/Were
-//   ch16PastHad,         // L5 — Simple Past: Had
-//   ch16Future,          // L6 — Simple Future: Will be / Will have
-//   ch16ChapterQuiz,     // L7 — Chapter Final Quiz
-//
-// ─────────────────────────────────────────────────────────────────────────────
-// FULL updated enum for reference (copy-paste the whole thing):
-// ─────────────────────────────────────────────────────────────────────────────
 
 enum LessonType {
   alphabets, vowelsConsonants, greetings, manners, time, daysMonths,

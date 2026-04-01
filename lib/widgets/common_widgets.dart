@@ -129,19 +129,25 @@ class ChapterCard extends StatelessWidget {
   final ChapterModel chapter;
   final int colorIndex;
   final VoidCallback? onTap;
-
+  /// Set true to force the lock appearance regardless of chapter.status
+  final bool forceShowLocked;
+ 
   const ChapterCard({
     super.key,
     required this.chapter,
     required this.colorIndex,
     this.onTap,
+    this.forceShowLocked = false,
   });
-
+ 
   @override
   Widget build(BuildContext context) {
-    final isLocked = chapter.status == LessonStatus.locked;
-    final color = AppColors.chapterColors[colorIndex % AppColors.chapterColors.length];
-
+    // Show locked if forced OR if chapter.status is locked
+    final isLocked =
+        forceShowLocked || chapter.status == LessonStatus.locked;
+    final color = AppColors.chapterColors[
+        colorIndex % AppColors.chapterColors.length];
+ 
     return GestureDetector(
       onTap: isLocked ? null : onTap,
       child: AnimatedContainer(
@@ -151,7 +157,9 @@ class ChapterCard extends StatelessWidget {
           color: isLocked ? AppColors.lockedBg : AppColors.surface,
           borderRadius: BorderRadius.circular(AppRadius.lg),
           border: Border.all(
-            color: isLocked ? AppColors.locked : color.withOpacity(0.25),
+            color: isLocked
+                ? AppColors.locked
+                : color.withOpacity(0.25),
             width: 1.5,
           ),
           boxShadow: isLocked ? [] : AppShadows.card,
@@ -161,61 +169,64 @@ class ChapterCard extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(
-                children: [
-                  // Chapter number badge
+              Row(children: [
+                // Chapter number badge
+                Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: isLocked ? AppColors.locked : color,
+                    borderRadius: BorderRadius.circular(AppRadius.md),
+                  ),
+                  child: Center(
+                    child: Text(
+                      '${chapter.id}',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w800,
+                        fontSize: 18,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: AppSpacing.md),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        chapter.title,
+                        style: AppTextStyles.headingMedium.copyWith(
+                          color: isLocked
+                              ? AppColors.textHint
+                              : AppColors.textPrimary,
+                        ),
+                      ),
+                      Text(
+                        chapter.titleHindi,
+                        style: AppTextStyles.bodyMedium.copyWith(
+                          color: isLocked ? AppColors.textHint : color,
+                          fontSize: 13,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                if (isLocked)
+                  const Icon(Icons.lock_rounded,
+                      color: AppColors.locked, size: 20)
+                else if (chapter.progress == 1.0)
                   Container(
-                    width: 40,
-                    height: 40,
+                    padding: const EdgeInsets.all(6),
                     decoration: BoxDecoration(
-                      color: isLocked ? AppColors.locked : color,
-                      borderRadius: BorderRadius.circular(AppRadius.md),
+                      color: AppColors.success.withOpacity(0.12),
+                      shape: BoxShape.circle,
                     ),
-                    child: Center(
-                      child: Text(
-                        '${chapter.id}',
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w800,
-                          fontSize: 18,
-                        ),
-                      ),
-                    ),
+                    child: const Icon(Icons.check_rounded,
+                        color: AppColors.success, size: 16),
                   ),
-                  const SizedBox(width: AppSpacing.md),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          chapter.title,
-                          style: AppTextStyles.headingMedium.copyWith(
-                            color: isLocked ? AppColors.textHint : AppColors.textPrimary,
-                          ),
-                        ),
-                        Text(
-                          chapter.titleHindi,
-                          style: AppTextStyles.bodyMedium.copyWith(
-                            color: isLocked ? AppColors.textHint : color,
-                            fontSize: 13,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  if (isLocked)
-                    const Icon(Icons.lock_rounded, color: AppColors.locked, size: 20)
-                  else if (chapter.progress == 1.0)
-                    Container(
-                      padding: const EdgeInsets.all(6),
-                      decoration: BoxDecoration(
-                        color: AppColors.success.withOpacity(0.12),
-                        shape: BoxShape.circle,
-                      ),
-                      child: const Icon(Icons.check_rounded, color: AppColors.success, size: 16),
-                    ),
-                ],
-              ),
+              ]),
+ 
               if (!isLocked) ...[
                 const SizedBox(height: AppSpacing.md),
                 Text(
@@ -238,15 +249,18 @@ class ChapterCard extends StatelessWidget {
                     ),
                     Text(
                       '${chapter.earnedXP}/${chapter.totalXP} XP',
-                      style: AppTextStyles.labelSmall.copyWith(color: AppColors.accentGold),
+                      style: AppTextStyles.labelSmall
+                          .copyWith(color: AppColors.accentGold),
                     ),
                   ],
                 ),
               ] else ...[
                 const SizedBox(height: AppSpacing.sm),
+                // Show which chapter needs to be completed to unlock this one
                 Text(
-                  'अध्याय ${chapter.id - 1} पूरा होने पर खुलेगा',
-                  style: AppTextStyles.labelSmall.copyWith(color: AppColors.textHint),
+                  'अध्याय ${chapter.id - 1} पूरा करने पर खुलेगा',
+                  style: AppTextStyles.labelSmall
+                      .copyWith(color: AppColors.textHint),
                 ),
               ],
             ],
@@ -256,7 +270,7 @@ class ChapterCard extends StatelessWidget {
     );
   }
 }
-
+ 
 // ─── Lesson Tile ────────────────────────────────────────────────────────────────
 class LessonTile extends StatelessWidget {
   final LessonModel lesson;
