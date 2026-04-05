@@ -5,6 +5,7 @@ import '../models/lesson_model.dart';
 import '../widgets/common_widgets.dart';
 import '../services/ad_service.dart';
 import '../services/progress_service.dart';
+import '../services/api_service.dart';
 
 class ScoreScreen extends StatefulWidget {
   final int score, total, xpEarned;
@@ -119,15 +120,15 @@ class _ScoreScreenState extends State<ScoreScreen>
     _adShown = true;
     await AdService().showRewarded(
       onRewarded: () async {
-        // Award coins and unlock next lesson
-        await AdService().awardQuizCoins();
-        await _unlockNextLesson();
-        if (mounted)
-          setState(() {
-            _coins = AdService().coins;
-            _adWatched = true;
-          });
-      },
+      await AdService().awardQuizCoins();
+      await _unlockNextLesson();
+      // ── Sync coins to backend ──
+      await ApiService.addCoins(AdService.coinsPerQuiz);
+      if (mounted) setState(() {
+        _coins = AdService().coins;
+        _adWatched = true;
+      });
+    },
       onComplete: () {
         if (mounted && !_adWatched) setState(() => _adWatched = true);
       },
@@ -137,14 +138,27 @@ class _ScoreScreenState extends State<ScoreScreen>
     );
   }
 
-  Future<void> _unlockNextLesson() async {
-    await ProgressService.completeLesson(
-      chapterId: widget.chapter.id,
+ Future<void> _unlockNextLesson() async {
+  // ── Save locally (existing) ──────────────────────────
+  await ProgressService.completeLesson(
+    chapterId: widget.chapter.id,
+    lessonId: widget.lesson.id,
+    xpEarned: widget.xpEarned,
+    totalLessonsInChapter: widget.chapter.lessons.length,
+  );
+
+  // ── Sync to backend ──────────────────────────────────
+  try {
+    final score = (widget.score / widget.total * 100).round();
+    await ApiService.completeLesson(
       lessonId: widget.lesson.id,
-      xpEarned: widget.xpEarned,
-      totalLessonsInChapter: widget.chapter.lessons.length,
+      score: score,
     );
+  } catch (e) {
+    print('Backend sync error: $e');
+    // Don't block user if backend fails
   }
+}
 
   Future<void> _maybeShowInterstitial() async {
     if (_adShown) return;

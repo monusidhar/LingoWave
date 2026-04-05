@@ -5,6 +5,15 @@ import '../models/lesson_model.dart';
 import '../widgets/common_widgets.dart';
 import '../home/chapter_detail_screen.dart';
 import '../services/progress_service.dart';
+import '../services/api_service.dart';
+import '../screens/login_screen.dart';
+import '../screens/leaderboard_screen.dart';
+import '../services/ad_service.dart';
+
+int _totalXPBackend = 0;
+int _coinsBackend = 0;
+int _completedLessonsBackend = 0;
+int _levelBackend = 1;
 
 class HomeScreen extends StatefulWidget {
   final String userName;
@@ -31,23 +40,45 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       vsync: this,
       duration: const Duration(milliseconds: 600),
     );
-    _headerFade =
-        CurvedAnimation(parent: _headerAnim, curve: Curves.easeOut);
+    _headerFade = CurvedAnimation(parent: _headerAnim, curve: Curves.easeOut);
     _headerSlide = Tween<Offset>(
       begin: const Offset(0, -0.2),
       end: Offset.zero,
-    ).animate(
-        CurvedAnimation(parent: _headerAnim, curve: Curves.easeOut));
+    ).animate(CurvedAnimation(parent: _headerAnim, curve: Curves.easeOut));
     _headerAnim.forward();
     _loadAll();
   }
 
   Future<void> _loadAll() async {
-    // Load progress for ALL chapters so lock state is fresh
+    // Load local progress for all chapters
     for (final chapter in _chapters) {
       await ProgressService.loadChapterProgress(chapter);
     }
-    _streak = await ProgressService.loadStreak();
+
+    // ── Get streak from backend ──────────────────────────
+    final streakResult = await ApiService.updateStreak();
+    if (streakResult['success'] && streakResult['data'] != null) {
+      _streak = streakResult['data']['streakDays'] ?? 0;
+    } else {
+      _streak = await ProgressService.loadStreak();
+    }
+
+    // ── Get profile from backend ─────────────────────────
+    final profileResult = await ApiService.getProfile();
+    if (profileResult['success'] && profileResult['data'] != null) {
+      final data = profileResult['data'];
+      _totalXPBackend = data['xp'] ?? 0;
+      _coinsBackend = data['coins'] ?? 0;
+      _levelBackend = data['level'] ?? 1;
+    }
+
+    // ── Get stats from backend ───────────────────────────
+    final statsResult = await ApiService.getStats();
+    if (statsResult['success'] && statsResult['data'] != null) {
+      final data = statsResult['data'];
+      _completedLessonsBackend = data['completedLessons'] ?? 0;
+    }
+
     if (mounted) setState(() {});
   }
 
@@ -371,30 +402,29 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   }
 
   Widget _buildProgressTab() {
-    final completedLessons = _chapters.fold<int>(
-        0,
-        (sum, c) =>
-            sum +
-            c.lessons
-                .where((l) => l.status == LessonStatus.completed)
-                .length);
-    final level = (_totalXP / _levelXP).floor() + 1;
+    final level = _levelBackend;
+    final xpForNextLevel = level * 500;
+    final currentLevelXp = _totalXPBackend % 500;
 
     return SafeArea(
-      child: Padding(
+      child: SingleChildScrollView(
         padding: const EdgeInsets.all(AppSpacing.lg),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text('प्रगति', style: AppTextStyles.displayMedium),
             const SizedBox(height: AppSpacing.lg),
+
+            // ── XP Card ─────────────────────────────────────────────
             Container(
-              padding: const EdgeInsets.all(AppSpacing.lg),
+              width: double.infinity,
+              padding: const EdgeInsets.all(AppSpacing.xl),
               decoration: BoxDecoration(
                 gradient: const LinearGradient(
                   colors: [Color(0xFF4F46E5), Color(0xFF7C3AED)],
                 ),
                 borderRadius: BorderRadius.circular(AppRadius.xl),
+                boxShadow: AppShadows.elevated,
               ),
               child: Column(children: [
                 const Text('कुल XP',
@@ -403,7 +433,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                         color: Colors.white70,
                         fontSize: 14)),
                 const SizedBox(height: 4),
-                Text('$_totalXP',
+                Text('$_totalXPBackend',
                     style: const TextStyle(
                         fontFamily: 'Nunito',
                         color: Colors.white,
@@ -414,33 +444,130 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                         fontFamily: 'Nunito',
                         color: Colors.white70,
                         fontSize: 14)),
+                const SizedBox(height: AppSpacing.md),
+                // Level progress bar
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(AppRadius.full),
+                  child: LinearProgressIndicator(
+                    value: currentLevelXp / 500,
+                    minHeight: 8,
+                    backgroundColor: Colors.white.withOpacity(0.2),
+                    valueColor: const AlwaysStoppedAnimation<Color>(
+                        AppColors.accentGold),
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'स्तर $level',
+                      style: const TextStyle(
+                          fontFamily: 'Nunito',
+                          color: Colors.white70,
+                          fontSize: 12),
+                    ),
+                    Text(
+                      '$currentLevelXp / 500 XP',
+                      style: const TextStyle(
+                          fontFamily: 'Nunito',
+                          color: Colors.white70,
+                          fontSize: 12),
+                    ),
+                  ],
+                ),
               ]),
             ),
+
             const SizedBox(height: AppSpacing.lg),
+
+            // ── Stats Row ────────────────────────────────────────────
             Row(children: [
               Expanded(
-                child: _buildStatCard('🔥', '$_streak',
-                    'दिन की स्ट्रीक', AppColors.accent),
+                child: _buildStatCard(
+                    '🔥', '$_streak', 'दिन की स्ट्रीक', AppColors.accent),
               ),
               const SizedBox(width: AppSpacing.md),
               Expanded(
-                child: _buildStatCard('📖', '$completedLessons',
+                child: _buildStatCard('📖', '$_completedLessonsBackend',
                     'पाठ पूरे', AppColors.success),
               ),
               const SizedBox(width: AppSpacing.md),
               Expanded(
-                child: _buildStatCard('⭐', 'स्तर $level',
-                    'वर्तमान', AppColors.accentGold),
+                child: _buildStatCard(
+                    '🪙', '$_coinsBackend', 'सिक्के', AppColors.accentGold),
               ),
             ]),
+
+            const SizedBox(height: AppSpacing.lg),
+
+            // ── Chapter Progress ─────────────────────────────────────
+            Text('अध्याय प्रगति', style: AppTextStyles.headingLarge),
+            const SizedBox(height: AppSpacing.md),
+
+            ..._chapters.asMap().entries.map((entry) {
+              final i = entry.key;
+              final chapter = entry.value;
+              final completed = chapter.lessons
+                  .where((l) => l.status == LessonStatus.completed)
+                  .length;
+              final total = chapter.lessons.length;
+              final accessible = _isChapterAccessible(i);
+
+              if (!accessible) return const SizedBox.shrink();
+
+              return Container(
+                margin: const EdgeInsets.only(bottom: AppSpacing.sm),
+                padding: const EdgeInsets.all(AppSpacing.md),
+                decoration: BoxDecoration(
+                  color: AppColors.surface,
+                  borderRadius: BorderRadius.circular(AppRadius.lg),
+                  boxShadow: AppShadows.card,
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Expanded(
+                          child: Text(
+                            'अध्याय ${chapter.id}: ${chapter.title}',
+                            style: AppTextStyles.labelLarge,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        Text(
+                          '$completed/$total',
+                          style: AppTextStyles.labelSmall
+                              .copyWith(color: AppColors.success),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: AppSpacing.sm),
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(AppRadius.full),
+                      child: LinearProgressIndicator(
+                        value: total > 0 ? completed / total : 0,
+                        minHeight: 6,
+                        backgroundColor: AppColors.primaryLight,
+                        valueColor: const AlwaysStoppedAnimation<Color>(
+                            AppColors.success),
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            }),
+
+            const SizedBox(height: AppSpacing.xxl),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildStatCard(
-      String emoji, String value, String label, Color color) {
+  Widget _buildStatCard(String emoji, String value, String label, Color color) {
     return Container(
       padding: const EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(
@@ -451,21 +578,24 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       child: Column(children: [
         Text(emoji, style: const TextStyle(fontSize: 24)),
         const SizedBox(height: 4),
-        Text(value,
-            style: AppTextStyles.headingMedium.copyWith(color: color)),
+        Text(value, style: AppTextStyles.headingMedium.copyWith(color: color)),
         Text(label,
-            style: AppTextStyles.labelSmall,
-            textAlign: TextAlign.center),
+            style: AppTextStyles.labelSmall, textAlign: TextAlign.center),
       ]),
     );
   }
 
   Widget _buildProfileTab() {
+    final user = _chapters; // just for reference
+    final level = _levelBackend;
+
     return SafeArea(
       child: SingleChildScrollView(
         padding: const EdgeInsets.all(AppSpacing.lg),
         child: Column(children: [
           const SizedBox(height: AppSpacing.lg),
+
+          // ── Avatar ───────────────────────────────────────────────
           Container(
             width: 88,
             height: 88,
@@ -492,22 +622,112 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           const SizedBox(height: AppSpacing.md),
           Text(widget.userName, style: AppTextStyles.displayMedium),
           Text('LingoWave शिक्षार्थी',
-              style: AppTextStyles.bodyMedium
-                  .copyWith(color: AppColors.primary)),
+              style:
+                  AppTextStyles.bodyMedium.copyWith(color: AppColors.primary)),
+
           const SizedBox(height: AppSpacing.xl),
-          _buildProfileItem(Icons.star_rounded,
-              'स्तर ${(_totalXP / _levelXP).floor() + 1}',
-              'Current Level', AppColors.accentGold),
-          _buildProfileItem(Icons.local_fire_department_rounded,
-              '$_streak दिन स्ट्रीक', 'Daily Streak', AppColors.accent),
-          _buildProfileItem(Icons.bolt_rounded, '$_totalXP XP',
-              'Experience Points', AppColors.primary),
-          _buildProfileItem(
-              Icons.book_rounded,
-              '${_chapters.fold<int>(0, (s, c) => s + c.lessons.where((l) => l.status == LessonStatus.completed).length)} पाठ पूरे',
-              'Lessons Completed',
-              AppColors.success),
+
+          // ── Stats Grid ───────────────────────────────────────────
+          Row(children: [
+            Expanded(
+              child: _buildProfileStat(
+                '⚡',
+                '$_totalXPBackend XP',
+                'कुल अनुभव',
+                AppColors.primary,
+              ),
+            ),
+            const SizedBox(width: AppSpacing.md),
+            Expanded(
+              child: _buildProfileStat(
+                '⭐',
+                'स्तर $level',
+                'वर्तमान स्तर',
+                AppColors.accentGold,
+              ),
+            ),
+          ]),
+          const SizedBox(height: AppSpacing.md),
+          Row(children: [
+            Expanded(
+              child: _buildProfileStat(
+                '🔥',
+                '$_streak दिन',
+                'स्ट्रीक',
+                AppColors.accent,
+              ),
+            ),
+            const SizedBox(width: AppSpacing.md),
+            Expanded(
+              child: _buildProfileStat(
+                '🪙',
+                '$_coinsBackend',
+                'सिक्के',
+                AppColors.accentGold,
+              ),
+            ),
+          ]),
+          const SizedBox(height: AppSpacing.md),
+          Row(children: [
+            Expanded(
+              child: _buildProfileStat(
+                '📖',
+                '$_completedLessonsBackend',
+                'पाठ पूरे',
+                AppColors.success,
+              ),
+            ),
+            const SizedBox(width: AppSpacing.md),
+            Expanded(
+              child: _buildProfileStat(
+                '📚',
+                '${_chapters.where((c) => c.isFullyCompleted).length}',
+                'अध्याय पूरे',
+                AppColors.primary,
+              ),
+            ),
+          ]),
+
+          const SizedBox(height: AppSpacing.md),
+
+// ── Leaderboard Button ─────────────────────────────
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton.icon(
+              onPressed: () async {
+                final user = await ApiService.getUser();
+                if (!mounted) return;
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => LeaderboardScreen(
+                      currentUserEmail: user?['email'] ?? '',
+                    ),
+                  ),
+                );
+              },
+              icon: const Text('🏆', style: TextStyle(fontSize: 18)),
+              label: const Text(
+                'लीडरबोर्ड देखें',
+                style: TextStyle(
+                  fontFamily: 'Nunito',
+                  fontWeight: FontWeight.w700,
+                  fontSize: 15,
+                ),
+              ),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(AppRadius.full),
+                ),
+              ),
+            ),
+          ),
+
           const SizedBox(height: AppSpacing.xl),
+
+          // ── App Info ─────────────────────────────────────────────
           Container(
             padding: const EdgeInsets.all(AppSpacing.md),
             decoration: BoxDecoration(
@@ -516,20 +736,111 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               boxShadow: AppShadows.card,
             ),
             child: Row(children: [
-              const Text('👨‍💻', style: TextStyle(fontSize: 24)),
+              const Text('🌊', style: TextStyle(fontSize: 24)),
               const SizedBox(width: AppSpacing.md),
               Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                Text('Created by', style: AppTextStyles.bodyMedium),
-                Text('Mohit Sharma',
+                Text('LingoWave',
                     style: AppTextStyles.labelLarge
                         .copyWith(color: AppColors.primary)),
+                const Text('हिंदी से English सीखें',
+                    style: AppTextStyles.bodyMedium),
               ]),
             ]),
           ),
+
+          const SizedBox(height: AppSpacing.md),
+
+          // ── Logout Button ─────────────────────────────────────────
+          SizedBox(
+            width: double.infinity,
+            child: OutlinedButton.icon(
+              onPressed: _logout,
+              icon: const Icon(Icons.logout_rounded,
+                  color: AppColors.error, size: 20),
+              label: const Text(
+                'लॉगआउट करें',
+                style: TextStyle(
+                  fontFamily: 'Nunito',
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.error,
+                ),
+              ),
+              style: OutlinedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                side: const BorderSide(color: AppColors.error),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(AppRadius.full),
+                ),
+              ),
+            ),
+          ),
+
+          const SizedBox(height: AppSpacing.xxl),
         ]),
       ),
     );
   }
+
+  Widget _buildProfileStat(
+      String emoji, String value, String label, Color color) {
+    return Container(
+      padding: const EdgeInsets.all(AppSpacing.md),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(AppRadius.lg),
+        boxShadow: AppShadows.card,
+        border: Border.all(color: color.withOpacity(0.15)),
+      ),
+      child: Column(children: [
+        Text(emoji, style: const TextStyle(fontSize: 28)),
+        const SizedBox(height: 6),
+        Text(value, style: AppTextStyles.headingMedium.copyWith(color: color)),
+        Text(label,
+            style: AppTextStyles.labelSmall, textAlign: TextAlign.center),
+      ]),
+    );
+  }
+
+  Future<void> _logout() async {
+  final confirm = await showDialog<bool>(
+    context: context,
+    builder: (ctx) => AlertDialog(
+      title: const Text('लॉगआउट करें?',
+          style: AppTextStyles.headingMedium),
+      content: const Text('क्या आप वाकई लॉगआउट करना चाहते हैं?',
+          style: AppTextStyles.bodyMedium),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(ctx, false),
+          child: const Text('रद्द करें'),
+        ),
+        TextButton(
+          onPressed: () => Navigator.pop(ctx, true),
+          child: const Text('लॉगआउट',
+              style: TextStyle(color: AppColors.error)),
+        ),
+      ],
+    ),
+  );
+
+  if (confirm == true) {
+    // ── Clear ALL local data ──────────────────────────
+    await ProgressService.resetAll();
+    await AdService.resetCoins();
+    await ApiService.clearAuth();
+
+    if (!mounted) return;
+    Navigator.of(context).pushAndRemoveUntil(
+      PageRouteBuilder(
+        pageBuilder: (_, __, ___) => const LoginScreen(),
+        transitionsBuilder: (_, anim, __, child) =>
+            FadeTransition(opacity: anim, child: child),
+        transitionDuration: const Duration(milliseconds: 400),
+      ),
+      (route) => false,
+    );
+  }
+}
 
   Widget _buildProfileItem(
       IconData icon, String value, String label, Color color) {
@@ -553,13 +864,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         ),
         const SizedBox(width: AppSpacing.md),
         Expanded(
-          child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
+          child:
+              Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             Text(value, style: AppTextStyles.labelLarge),
-            Text(label,
-                style:
-                    AppTextStyles.bodyMedium.copyWith(fontSize: 12)),
+            Text(label, style: AppTextStyles.bodyMedium.copyWith(fontSize: 12)),
           ]),
         ),
       ]),
@@ -599,8 +907,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 onTap: () => setState(() => _navIndex = i),
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 200),
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 16, vertical: 8),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   decoration: BoxDecoration(
                     color: active
                         ? AppColors.primary.withOpacity(0.1)
@@ -612,9 +920,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                     children: [
                       Icon(
                         item['icon'] as IconData,
-                        color: active
-                            ? AppColors.primary
-                            : AppColors.textHint,
+                        color: active ? AppColors.primary : AppColors.textHint,
                         size: 22,
                       ),
                       const SizedBox(height: 2),
@@ -623,12 +929,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                         style: TextStyle(
                           fontFamily: 'Nunito',
                           fontSize: 10,
-                          fontWeight: active
-                              ? FontWeight.w700
-                              : FontWeight.w500,
-                          color: active
-                              ? AppColors.primary
-                              : AppColors.textHint,
+                          fontWeight:
+                              active ? FontWeight.w700 : FontWeight.w500,
+                          color:
+                              active ? AppColors.primary : AppColors.textHint,
                         ),
                       ),
                     ],

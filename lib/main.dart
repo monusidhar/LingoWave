@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'theme/app_theme.dart';
 import 'screens/splash_screen.dart';
 import 'services/ad_service.dart';
+import 'services/notification_service.dart';
+import 'firebase_options.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -21,8 +24,16 @@ void main() async {
     ),
   );
 
+  // ── Firebase Init ─────────────────────────────────────────────────────────
+ await Firebase.initializeApp(
+  options: DefaultFirebaseOptions.currentPlatform,
+);
+
   // ── AdMob Init ───────────────────────────────────────────────────────────
   await AdService().initialize();
+
+  // ── Notifications Init ───────────────────────────────────────────────────
+  await NotificationService().initialize();
 
   runApp(const LingoWaveApp());
 }

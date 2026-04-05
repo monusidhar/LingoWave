@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "355406099603",
+    "project_id": "lingowave-b1d94",
+    "storage_bucket": "lingowave-b1d94.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:355406099603:android:6884f6d85c535431d44966",
+        "android_client_info": {
+          "package_name": "com.example.lingowave"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "355406099603-vh5fr32no57993daf7ukj0q3eauhbh8h.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.lingowave",
+            "certificate_hash": "2e7952a5aee269c1c534b7989a6c0430df9fa589"
+          }
+        },
+        {
+          "client_id": "355406099603-dmnv80f1281u65nob6h2300i4hg7r0o5.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDD4VCa4LqFqFFX3zRcET7Rg_XPl1Ydfik"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "355406099603-dmnv80f1281u65nob6h2300i4hg7r0o5.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
