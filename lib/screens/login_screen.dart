@@ -73,7 +73,9 @@ class _LoginScreenState extends State<LoginScreen>
     setState(() => _loading = false);
 
     if (result['success']) {
-      _navigateAfterAuth();
+      await ProgressService.resetAll();
+  await AdService.resetCoins();
+  _navigateAfterAuth();
     } else {
       setState(() => _error = result['message'] ?? 'लॉगिन विफल हुआ');
     }
