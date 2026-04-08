@@ -4,9 +4,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:async';
 
 class ApiService {
-  // static const String baseUrl = 'http://192.168.1.2:3000'; // Android emulator
-  static const String baseUrl =
-      'https://lingowave-backend-production.up.railway.app'; // Android emulator
+  static const String baseUrl = 'http://192.168.1.2:3000'; // Android emulator
+  // static const String baseUrl =
+  //     'https://lingowave-backend-production.up.railway.app'; // Android emulator
 
   static const String _tokenKey = 'auth_token';
   static const String _userKey = 'auth_user';
@@ -157,38 +157,41 @@ class ApiService {
 
   // ── Complete Lesson ───────────────────────────────────────────────────────
   static Future<Map<String, dynamic>> completeLesson({
-  required int lessonId,
-  required int score,
-  required int chapterId,
-}) async {
-  try {
-    print('Completing lesson $lessonId with score $score and chapter $chapterId');
-    final res = await http.post(
-      Uri.parse('$baseUrl/lessons/$lessonId/complete'),
-      headers: await _authHeaders(),
-      body: jsonEncode({
-        'score': score,
-        'chapterId': chapterId,
-      }),
-    ).timeout(const Duration(seconds: 5));
+    required int lessonId,
+    required int score,
+    required int chapterId,
+  }) async {
+    try {
+      print(
+          'Completing lesson $lessonId with score $score and chapter $chapterId');
+      final res = await http
+          .post(
+            Uri.parse('$baseUrl/lessons/$lessonId/complete'),
+            headers: await _authHeaders(),
+            body: jsonEncode({
+              'score': score,
+              'chapterId': chapterId,
+            }),
+          )
+          .timeout(const Duration(seconds: 5));
 
-    print('Complete lesson status: ${res.statusCode}');
-    print('Complete lesson body: ${res.body}');
+      print('Complete lesson status: ${res.statusCode}');
+      print('Complete lesson body: ${res.body}');
 
-    if (res.statusCode == 200 || res.statusCode == 201) {
-      final data = jsonDecode(res.body);
-      final prefs = await SharedPreferences.getInstance();
-      final currentXp = prefs.getInt('lw_total_xp') ?? 0;
-      await prefs.setInt(
-          'lw_total_xp', currentXp + ((data['xpEarned'] ?? 0) as int));
-      return {'success': true, 'data': data};
+      if (res.statusCode == 200 || res.statusCode == 201) {
+        final data = jsonDecode(res.body);
+        final prefs = await SharedPreferences.getInstance();
+        final currentXp = prefs.getInt('lw_total_xp') ?? 0;
+        await prefs.setInt(
+            'lw_total_xp', currentXp + ((data['xpEarned'] ?? 0) as int));
+        return {'success': true, 'data': data};
+      }
+      return {'success': false};
+    } catch (e) {
+      print('Complete lesson error: $e');
+      return {'success': false};
     }
-    return {'success': false};
-  } catch (e) {
-    print('Complete lesson error: $e');
-    return {'success': false};
   }
-}
 
   // ── Forgot Password ───────────────────────────────────────────────────────
   static Future<Map<String, dynamic>> forgotPassword(String email) async {
@@ -310,19 +313,21 @@ class ApiService {
   }
 
   static Future<Map<String, dynamic>> getUserProgress() async {
-  try {
-    final res = await http.get(
-      Uri.parse('$baseUrl/lessons/progress'),
-      headers: await _authHeaders(),
-    ).timeout(const Duration(seconds: 10));
+    try {
+      final res = await http
+          .get(
+            Uri.parse('$baseUrl/lessons/progress'),
+            headers: await _authHeaders(),
+          )
+          .timeout(const Duration(seconds: 10));
 
-    if (res.statusCode == 200) {
-      return {'success': true, 'data': jsonDecode(res.body)};
+      if (res.statusCode == 200) {
+        return {'success': true, 'data': jsonDecode(res.body)};
+      }
+      return {'success': false};
+    } catch (e) {
+      print('Get progress error: $e');
+      return {'success': false};
     }
-    return {'success': false};
-  } catch (e) {
-    print('Get progress error: $e');
-    return {'success': false};
   }
-}
 }
