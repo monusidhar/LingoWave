@@ -209,4 +209,65 @@ class ProgressService {
       await prefs.setString(_lastActiveKey, todayStr);
     }
   }
+
+  static Future<void> restoreProgressFromBackend(
+    List<dynamic> progressData) async {
+  final prefs = await SharedPreferences.getInstance();
+
+  for (final progress in progressData) {
+    final chapterId = progress['chapterId'] as int;
+    final lessonId = progress['lessonId'] as int;
+    final completed = progress['completed'] as bool;
+    final xpEarned = progress['xpEarned'] as int;
+
+    if (completed) {
+      // Save lesson as completed
+      await prefs.setInt(
+        '${_prefix}ch${chapterId}_les${lessonId}_status',
+        LessonStatus.completed.index,
+      );
+      await prefs.setInt(
+        '${_prefix}ch${chapterId}_les${lessonId}_xp',
+        xpEarned,
+      );
+
+      // Update total XP
+      final currentXp = prefs.getInt(_totalXpKey) ?? 0;
+      await prefs.setInt(_totalXpKey, currentXp + xpEarned);
+    }
+  }
+
+  // Unlock next lessons based on completed ones
+  await _unlockNextLessonsFromProgress(prefs, progressData);
+}
+
+static Future<void> _unlockNextLessonsFromProgress(
+    SharedPreferences prefs, List<dynamic> progressData) async {
+  // Group by chapter
+  final Map<int, List<int>> chapterLessons = {};
+  for (final p in progressData) {
+    if (p['completed'] == true) {
+      final chId = p['chapterId'] as int;
+      final lsId = p['lessonId'] as int;
+      chapterLessons[chId] = [...(chapterLessons[chId] ?? []), lsId];
+    }
+  }
+
+  // For each chapter, unlock next lesson after last completed
+  for (final entry in chapterLessons.entries) {
+    final chapterId = entry.key;
+    final completedLessons = entry.value..sort();
+    if (completedLessons.isNotEmpty) {
+      final lastCompleted = completedLessons.last;
+      final nextKey =
+          '${_prefix}ch${chapterId}_les${lastCompleted + 1}_status';
+      final nextVal = prefs.getInt(nextKey);
+      if (nextVal == null ||
+          nextVal == LessonStatus.locked.index) {
+        await prefs.setInt(
+            nextKey, LessonStatus.inProgress.index);
+      }
+    }
+  }
+}
 }

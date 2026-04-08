@@ -50,11 +50,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   }
 
   Future<void> _loadAll() async {
-    // Load local progress for all chapters
-    for (final chapter in _chapters) {
-      await ProgressService.loadChapterProgress(chapter);
-    }
-
     // ── Get streak from backend ──────────────────────────
     final streakResult = await ApiService.updateStreak();
     if (streakResult['success'] && streakResult['data'] != null) {
@@ -78,6 +73,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       final data = statsResult['data'];
       _completedLessonsBackend = data['completedLessons'] ?? 0;
     }
+
+    // ── Optionally: update local progress with backend data here ──
+    // (Implement if you want offline support, otherwise skip)
 
     if (mounted) setState(() {});
   }
@@ -802,45 +800,44 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   }
 
   Future<void> _logout() async {
-  final confirm = await showDialog<bool>(
-    context: context,
-    builder: (ctx) => AlertDialog(
-      title: const Text('लॉगआउट करें?',
-          style: AppTextStyles.headingMedium),
-      content: const Text('क्या आप वाकई लॉगआउट करना चाहते हैं?',
-          style: AppTextStyles.bodyMedium),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(ctx, false),
-          child: const Text('रद्द करें'),
-        ),
-        TextButton(
-          onPressed: () => Navigator.pop(ctx, true),
-          child: const Text('लॉगआउट',
-              style: TextStyle(color: AppColors.error)),
-        ),
-      ],
-    ),
-  );
-
-  if (confirm == true) {
-    // ── Clear ALL local data ──────────────────────────
-    await ProgressService.resetAll();
-    await AdService.resetCoins();
-    await ApiService.clearAuth();
-
-    if (!mounted) return;
-    Navigator.of(context).pushAndRemoveUntil(
-      PageRouteBuilder(
-        pageBuilder: (_, __, ___) => const LoginScreen(),
-        transitionsBuilder: (_, anim, __, child) =>
-            FadeTransition(opacity: anim, child: child),
-        transitionDuration: const Duration(milliseconds: 400),
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('लॉगआउट करें?', style: AppTextStyles.headingMedium),
+        content: const Text('क्या आप वाकई लॉगआउट करना चाहते हैं?',
+            style: AppTextStyles.bodyMedium),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('रद्द करें'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child:
+                const Text('लॉगआउट', style: TextStyle(color: AppColors.error)),
+          ),
+        ],
       ),
-      (route) => false,
     );
+
+    if (confirm == true) {
+      // ── Clear ALL local data ──────────────────────────
+      await ProgressService.resetAll();
+      await AdService.resetCoins();
+      await ApiService.clearAuth();
+
+      if (!mounted) return;
+      Navigator.of(context).pushAndRemoveUntil(
+        PageRouteBuilder(
+          pageBuilder: (_, __, ___) => const LoginScreen(),
+          transitionsBuilder: (_, anim, __, child) =>
+              FadeTransition(opacity: anim, child: child),
+          transitionDuration: const Duration(milliseconds: 400),
+        ),
+        (route) => false,
+      );
+    }
   }
-}
 
   Widget _buildProfileItem(
       IconData icon, String value, String label, Color color) {

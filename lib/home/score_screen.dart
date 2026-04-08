@@ -139,7 +139,6 @@ class _ScoreScreenState extends State<ScoreScreen>
   }
 
  Future<void> _unlockNextLesson() async {
-  // ── Save locally (existing) ──────────────────────────
   await ProgressService.completeLesson(
     chapterId: widget.chapter.id,
     lessonId: widget.lesson.id,
@@ -150,13 +149,15 @@ class _ScoreScreenState extends State<ScoreScreen>
   // ── Sync to backend ──────────────────────────────────
   try {
     final score = (widget.score / widget.total * 100).round();
-    await ApiService.completeLesson(
+    print('Syncing lesson to backend: lessonId=${widget.lesson.id}, score=$score');
+    final result = await ApiService.completeLesson(
       lessonId: widget.lesson.id,
       score: score,
+      chapterId: widget.chapter.id,
     );
+    print('Backend sync result: $result');
   } catch (e) {
     print('Backend sync error: $e');
-    // Don't block user if backend fails
   }
 }
 
