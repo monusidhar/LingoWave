@@ -4,9 +4,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:async';
 
 class ApiService {
-  static const String baseUrl = 'http://192.168.1.2:3000'; // Android emulator
-  // static const String baseUrl =
-  //     'https://lingowave-backend-production.up.railway.app'; // Android emulator
+  // static const String baseUrl = 'http://192.168.1.2:3000'; // Android emulator
+  static const String baseUrl =
+      'https://lingowave-backend-production.up.railway.app'; // Android emulator
 
   static const String _tokenKey = 'auth_token';
   static const String _userKey = 'auth_user';
@@ -162,8 +162,6 @@ class ApiService {
     required int chapterId,
   }) async {
     try {
-      print(
-          'Completing lesson $lessonId with score $score and chapter $chapterId');
       final res = await http
           .post(
             Uri.parse('$baseUrl/lessons/$lessonId/complete'),
