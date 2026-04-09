@@ -10,11 +10,6 @@ import '../screens/login_screen.dart';
 import '../screens/leaderboard_screen.dart';
 import '../services/ad_service.dart';
 
-int _totalXPBackend = 0;
-int _coinsBackend = 0;
-int _completedLessonsBackend = 0;
-int _levelBackend = 1;
-
 class HomeScreen extends StatefulWidget {
   final String userName;
 
@@ -26,12 +21,18 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   int _navIndex = 0;
-  final List<ChapterModel> _chapters = Chapter1Data.chapters;
+  List<ChapterModel> _chapters = Chapter1Data.chapters;
   int _streak = 0;
+
+  int _totalXPBackend = 0;
+  int _coinsBackend = 0;
+  int _completedLessonsBackend = 0;
+  int _levelBackend = 1;
 
   late AnimationController _headerAnim;
   late Animation<double> _headerFade;
   late Animation<Offset> _headerSlide;
+  bool _isLoading = true;
 
   @override
   void initState() {
@@ -50,6 +51,16 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   }
 
   Future<void> _loadAll() async {
+    setState(() {
+      _isLoading = true;
+    });
+    // ── Load local progress for all chapters ────────────
+    List<ChapterModel> updatedChapters = [];
+    for (final chapter in Chapter1Data.chapters) {
+      await ProgressService.loadChapterProgress(chapter);
+      updatedChapters.add(chapter);
+    }
+    _chapters = updatedChapters;
     // ── Get streak from backend ──────────────────────────
     final streakResult = await ApiService.updateStreak();
     if (streakResult['success'] && streakResult['data'] != null) {
@@ -77,7 +88,11 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     // ── Optionally: update local progress with backend data here ──
     // (Implement if you want offline support, otherwise skip)
 
-    if (mounted) setState(() {});
+    if (mounted) {
+      setState(() {
+        _isLoading = false;
+      });
+    }
   }
 
   @override
@@ -201,6 +216,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                         ),
                         const SizedBox(height: AppSpacing.lg),
                         // XP Bar
+                        // Header XP bar — use backend data
                         Row(
                           children: [
                             Container(
@@ -212,7 +228,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                     BorderRadius.circular(AppRadius.full),
                               ),
                               child: Text(
-                                'स्तर ${(_totalXP / _levelXP).floor() + 1}',
+                                'स्तर ${_levelBackend > 1 ? _levelBackend : (_totalXP ~/ 500) + 1}',
                                 style: AppTextStyles.labelSmall.copyWith(
                                   color: Colors.white,
                                   fontWeight: FontWeight.w700,
@@ -224,26 +240,81 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                               child: ClipRRect(
                                 borderRadius:
                                     BorderRadius.circular(AppRadius.full),
-                                child: LinearProgressIndicator(
-                                  value: (_totalXP % _levelXP) / _levelXP,
-                                  minHeight: 8,
-                                  backgroundColor:
-                                      Colors.white.withOpacity(0.2),
-                                  valueColor:
-                                      const AlwaysStoppedAnimation<Color>(
-                                          AppColors.accentGold),
+                                child: TweenAnimationBuilder<double>(
+                                  tween: Tween<double>(
+                                    begin: 0,
+                                    end: _isLoading
+                                        ? (_totalXP % 500) / 500
+                                        : (_totalXPBackend % 500) / 500,
+                                  ),
+                                  duration: const Duration(milliseconds: 700),
+                                  builder: (context, value, child) =>
+                                      LinearProgressIndicator(
+                                    value: value,
+                                    minHeight: 8,
+                                    backgroundColor:
+                                        Colors.white.withOpacity(0.2),
+                                    valueColor:
+                                        const AlwaysStoppedAnimation<Color>(
+                                            AppColors.accentGold),
+                                  ),
                                 ),
                               ),
                             ),
                             const SizedBox(width: AppSpacing.sm),
                             Text(
-                              '$_totalXP XP',
+                              _isLoading
+                                  ? '$_totalXP XP'
+                                  : '$_totalXPBackend XP',
                               style: AppTextStyles.labelSmall.copyWith(
                                 color: Colors.white70,
                               ),
                             ),
                           ],
                         ),
+                        // Row(
+                        //   children: [
+                        //     Container(
+                        //       padding: const EdgeInsets.symmetric(
+                        //           horizontal: 10, vertical: 4),
+                        //       decoration: BoxDecoration(
+                        //         color: Colors.white.withOpacity(0.2),
+                        //         borderRadius:
+                        //             BorderRadius.circular(AppRadius.full),
+                        //       ),
+                        //       child: Text(
+                        //         'स्तर ${(_totalXP / _levelXP).floor() + 1}',
+                        //         style: AppTextStyles.labelSmall.copyWith(
+                        //           color: Colors.white,
+                        //           fontWeight: FontWeight.w700,
+                        //         ),
+                        //       ),
+                        //     ),
+                        //     const SizedBox(width: AppSpacing.sm),
+                        //     Expanded(
+                        //       child: ClipRRect(
+                        //         borderRadius:
+                        //             BorderRadius.circular(AppRadius.full),
+                        //         child: LinearProgressIndicator(
+                        //           value: (_totalXP % _levelXP) / _levelXP,
+                        //           minHeight: 8,
+                        //           backgroundColor:
+                        //               Colors.white.withOpacity(0.2),
+                        //           valueColor:
+                        //               const AlwaysStoppedAnimation<Color>(
+                        //                   AppColors.accentGold),
+                        //         ),
+                        //       ),
+                        //     ),
+                        //     const SizedBox(width: AppSpacing.sm),
+                        //     Text(
+                        //       '$_totalXP XP',
+                        //       style: AppTextStyles.labelSmall.copyWith(
+                        //         color: Colors.white70,
+                        //       ),
+                        //     ),
+                        //   ],
+                        // ),
                       ],
                     ),
                   ),

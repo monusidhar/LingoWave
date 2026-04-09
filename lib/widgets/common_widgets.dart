@@ -23,6 +23,7 @@ class XPBar extends StatefulWidget {
 class _XPBarState extends State<XPBar> with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _animation;
+  double _oldValue = 0;
 
   @override
   void initState() {
@@ -31,11 +32,31 @@ class _XPBarState extends State<XPBar> with SingleTickerProviderStateMixin {
       vsync: this,
       duration: const Duration(milliseconds: 900),
     );
+    _oldValue = widget.total == 0 ? 0 : widget.current / widget.total;
     _animation = Tween<double>(
       begin: 0,
-      end: widget.current / widget.total,
+      end: _oldValue,
     ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic));
     _controller.forward();
+  }
+
+  @override
+  void didUpdateWidget(covariant XPBar oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    final double newValue = widget.total == 0
+        ? 0.0
+        : widget.current.toDouble() / widget.total.toDouble();
+    if (newValue != _oldValue) {
+      _animation = Tween<double>(
+        begin: _oldValue,
+        end: newValue,
+      ).animate(
+          CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic));
+      _controller
+        ..reset()
+        ..forward();
+      _oldValue = newValue;
+    }
   }
 
   @override
@@ -82,7 +103,8 @@ class _XPBarState extends State<XPBar> with SingleTickerProviderStateMixin {
               value: _animation.value,
               minHeight: 8,
               backgroundColor: AppColors.primaryLight,
-              valueColor: const AlwaysStoppedAnimation<Color>(AppColors.accentGold),
+              valueColor:
+                  const AlwaysStoppedAnimation<Color>(AppColors.accentGold),
             ),
           ),
         ),
@@ -129,9 +151,10 @@ class ChapterCard extends StatelessWidget {
   final ChapterModel chapter;
   final int colorIndex;
   final VoidCallback? onTap;
+
   /// Set true to force the lock appearance regardless of chapter.status
   final bool forceShowLocked;
- 
+
   const ChapterCard({
     super.key,
     required this.chapter,
@@ -139,15 +162,14 @@ class ChapterCard extends StatelessWidget {
     this.onTap,
     this.forceShowLocked = false,
   });
- 
+
   @override
   Widget build(BuildContext context) {
     // Show locked if forced OR if chapter.status is locked
-    final isLocked =
-        forceShowLocked || chapter.status == LessonStatus.locked;
-    final color = AppColors.chapterColors[
-        colorIndex % AppColors.chapterColors.length];
- 
+    final isLocked = forceShowLocked || chapter.status == LessonStatus.locked;
+    final color =
+        AppColors.chapterColors[colorIndex % AppColors.chapterColors.length];
+
     return GestureDetector(
       onTap: isLocked ? null : onTap,
       child: AnimatedContainer(
@@ -157,9 +179,7 @@ class ChapterCard extends StatelessWidget {
           color: isLocked ? AppColors.lockedBg : AppColors.surface,
           borderRadius: BorderRadius.circular(AppRadius.lg),
           border: Border.all(
-            color: isLocked
-                ? AppColors.locked
-                : color.withOpacity(0.25),
+            color: isLocked ? AppColors.locked : color.withOpacity(0.25),
             width: 1.5,
           ),
           boxShadow: isLocked ? [] : AppShadows.card,
@@ -226,7 +246,6 @@ class ChapterCard extends StatelessWidget {
                         color: AppColors.success, size: 16),
                   ),
               ]),
- 
               if (!isLocked) ...[
                 const SizedBox(height: AppSpacing.md),
                 Text(
@@ -270,7 +289,7 @@ class ChapterCard extends StatelessWidget {
     );
   }
 }
- 
+
 // ─── Lesson Tile ────────────────────────────────────────────────────────────────
 class LessonTile extends StatelessWidget {
   final LessonModel lesson;
@@ -332,9 +351,11 @@ class LessonTile extends StatelessWidget {
                   ),
                   child: Center(
                     child: isCompleted
-                        ? const Icon(Icons.check_rounded, color: Colors.white, size: 20)
+                        ? const Icon(Icons.check_rounded,
+                            color: Colors.white, size: 20)
                         : isLocked
-                            ? const Icon(Icons.lock_rounded, color: AppColors.locked, size: 18)
+                            ? const Icon(Icons.lock_rounded,
+                                color: AppColors.locked, size: 18)
                             : Text(
                                 lesson.emoji,
                                 style: const TextStyle(fontSize: 20),
@@ -346,7 +367,9 @@ class LessonTile extends StatelessWidget {
                   Expanded(
                     child: Container(
                       width: 2,
-                      color: isCompleted ? AppColors.success.withOpacity(0.3) : AppColors.locked,
+                      color: isCompleted
+                          ? AppColors.success.withOpacity(0.3)
+                          : AppColors.locked,
                     ),
                   ),
               ],
@@ -368,7 +391,8 @@ class LessonTile extends StatelessWidget {
                           : AppColors.surface,
                   borderRadius: BorderRadius.circular(AppRadius.md),
                   border: isActive
-                      ? Border.all(color: activeColor.withOpacity(0.4), width: 1.5)
+                      ? Border.all(
+                          color: activeColor.withOpacity(0.4), width: 1.5)
                       : null,
                   boxShadow: isActive ? AppShadows.card : [],
                 ),
@@ -381,7 +405,9 @@ class LessonTile extends StatelessWidget {
                           Text(
                             lesson.title,
                             style: AppTextStyles.labelLarge.copyWith(
-                              color: isLocked ? AppColors.textHint : AppColors.textPrimary,
+                              color: isLocked
+                                  ? AppColors.textHint
+                                  : AppColors.textPrimary,
                             ),
                           ),
                           const SizedBox(height: 2),
@@ -389,7 +415,8 @@ class LessonTile extends StatelessWidget {
                             lesson.titleHindi,
                             style: AppTextStyles.bodyMedium.copyWith(
                               fontSize: 12,
-                              color: isLocked ? AppColors.textHint : activeColor,
+                              color:
+                                  isLocked ? AppColors.textHint : activeColor,
                             ),
                           ),
                         ],
@@ -397,7 +424,8 @@ class LessonTile extends StatelessWidget {
                     ),
                     if (isActive)
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 10, vertical: 4),
                         decoration: BoxDecoration(
                           color: activeColor,
                           borderRadius: BorderRadius.circular(AppRadius.full),
@@ -506,7 +534,8 @@ class _PrimaryButtonState extends State<PrimaryButton>
           ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
-            mainAxisSize: widget.isFullWidth ? MainAxisSize.max : MainAxisSize.min,
+            mainAxisSize:
+                widget.isFullWidth ? MainAxisSize.max : MainAxisSize.min,
             children: [
               if (widget.emoji != null) ...[
                 Text(widget.emoji!, style: const TextStyle(fontSize: 18)),
@@ -578,10 +607,6 @@ class InfoCard extends StatelessWidget {
     );
   }
 }
-
-
-
-
 
 class LessonCommonWidgets {
   final FlutterTts tts;
@@ -688,9 +713,11 @@ class LessonCommonWidgets {
     );
   }
 
-  Widget phraseGroupHeader(String emoji, String title, String subtitle, Color color) {
+  Widget phraseGroupHeader(
+      String emoji, String title, String subtitle, Color color) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: 10),
+      padding:
+          const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: 10),
       decoration: BoxDecoration(
         color: color.withOpacity(0.1),
         borderRadius: BorderRadius.circular(AppRadius.md),
@@ -738,7 +765,8 @@ class LessonCommonWidgets {
     );
   }
 
-  Widget quizStatBadge2(String value, String label) => quizStatBadge(value, label);
+  Widget quizStatBadge2(String value, String label) =>
+      quizStatBadge(value, label);
 
   Widget ruleRow(String condition, String result) {
     return Padding(
@@ -900,8 +928,8 @@ class LessonCommonWidgets {
                           Text(item['en']!, style: AppTextStyles.labelLarge),
                           const SizedBox(width: 8),
                           Text('(${item['hi']!})',
-                              style: AppTextStyles.bodyMedium.copyWith(
-                                  color: accentColor, fontSize: 12)),
+                              style: AppTextStyles.bodyMedium
+                                  .copyWith(color: accentColor, fontSize: 12)),
                         ]),
                         Text(item['example']!,
                             style: AppTextStyles.bodyMedium
