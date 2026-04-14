@@ -24,10 +24,11 @@ if (flutterVersionName == null) {
 
 android {
     namespace "com.example.lingowave"
-    compileSdk 34                       
-    ndkVersion flutter.ndkVersion
+    compileSdk 36
+    ndkVersion "28.2.13676358"
 
     compileOptions {
+        coreLibraryDesugaringEnabled true
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
@@ -42,8 +43,8 @@ android {
 
     defaultConfig {
         applicationId "com.example.lingowave"
-        minSdkVersion 21
-        targetSdkVersion 34    // ✅ was 34
+        minSdkVersion 24
+        targetSdkVersion 36
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
     }
@@ -59,6 +60,9 @@ flutter {
     source '../..'
 }
 
-dependencies {}
+dependencies {
+    coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.0.4'
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:2.1.0"
+}
 
 apply plugin: 'com.google.gms.google-services'
