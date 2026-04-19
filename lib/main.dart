@@ -5,18 +5,17 @@ import 'theme/app_theme.dart';
 import 'screens/splash_screen.dart';
 import 'services/ad_service.dart';
 import 'services/notification_service.dart';
+import 'services/subscription_service.dart';
 import 'firebase_options.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // ── Orientation ──────────────────────────────────────────────────────────
   await SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown,
   ]);
 
-  // ── Status Bar ───────────────────────────────────────────────────────────
   SystemChrome.setSystemUIOverlayStyle(
     const SystemUiOverlayStyle(
       statusBarColor: Colors.transparent,
@@ -24,15 +23,17 @@ void main() async {
     ),
   );
 
-  // ── Firebase Init ─────────────────────────────────────────────────────────
- await Firebase.initializeApp(
-  options: DefaultFirebaseOptions.currentPlatform,
-);
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
 
-  // ── AdMob Init ───────────────────────────────────────────────────────────
+  // ── Init Subscription FIRST ───────────────────────────
+  await SubscriptionService().initialize();
+
+  // ── AdMob Init ────────────────────────────────────────
   await AdService().initialize();
 
-  // ── Notifications Init ───────────────────────────────────────────────────
+  // ── Notifications Init ────────────────────────────────
   await NotificationService().initialize();
 
   runApp(const LingoWaveApp());

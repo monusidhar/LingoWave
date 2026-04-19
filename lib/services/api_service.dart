@@ -328,4 +328,40 @@ class ApiService {
       return {'success': false};
     }
   }
+
+  static Future<Map<String, dynamic>> setPremium(bool isPremium) async {
+  try {
+    final res = await http.post(
+      Uri.parse('$baseUrl/users/premium'),
+      headers: await _authHeaders(),
+      body: jsonEncode({'isPremium': isPremium}),
+    ).timeout(const Duration(seconds: 5));
+
+    if (res.statusCode == 200 || res.statusCode == 201) {
+      return {'success': true};
+    }
+    return {'success': false};
+  } catch (e) {
+    print('Set premium error: $e');
+    return {'success': false};
+  }
+}
+
+static Future<bool> getPremiumStatus() async {
+  try {
+    final res = await http.get(
+      Uri.parse('$baseUrl/users/premium/status'),
+      headers: await _authHeaders(),
+    ).timeout(const Duration(seconds: 5));
+
+    if (res.statusCode == 200) {
+      final data = jsonDecode(res.body);
+      return data['isPremium'] ?? false;
+    }
+    return false;
+  } catch (e) {
+    print('Get premium status error: $e');
+    return false;
+  }
+}
 }

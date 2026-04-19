@@ -1,6 +1,7 @@
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/foundation.dart';
+import 'subscription_service.dart';
 
 /// Central Ad Service for LingoWave
 class AdService {
@@ -44,7 +45,7 @@ class AdService {
   int _coins = 0;
 
   // ─── Getters ──────────────────────────────────────────────────────────────
-  bool get isPremium => _isPremium;
+  bool get isPremium => _isPremium || SubscriptionService().isPremium;
   int get coins => _coins;
   bool get isInterstitialReady => _interstitialAd != null;
   bool get isRewardedReady => _rewardedAd != null;
@@ -56,8 +57,16 @@ class AdService {
   Future<void> initialize() async {
     await MobileAds.instance.initialize();
     await _loadState();
-    _preloadInterstitial();
-    _preloadRewarded();
+
+    // ── Sync premium from SubscriptionService ────────────
+    if (SubscriptionService().isPremium) {
+      _isPremium = true;
+    }
+
+    if (!_isPremium) {
+      _preloadInterstitial();
+      _preloadRewarded();
+    }
   }
 
   Future<void> _loadState() async {

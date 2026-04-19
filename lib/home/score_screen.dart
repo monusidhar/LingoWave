@@ -6,6 +6,7 @@ import '../widgets/common_widgets.dart';
 import '../services/ad_service.dart';
 import '../services/progress_service.dart';
 import '../services/api_service.dart';
+import '../services/subscription_service.dart';
 
 class ScoreScreen extends StatefulWidget {
   final int score, total, xpEarned;
@@ -116,27 +117,35 @@ class _ScoreScreenState extends State<ScoreScreen>
   }
 
   Future<void> _showLessonRewardedAd() async {
-    if (_adShown) return;
-    _adShown = true;
-    await AdService().showRewarded(
-      onRewarded: () async {
+  if (_adShown) return;
+  _adShown = true;
+
+  // ── Skip ads for premium users ────────────────────
+  if (AdService().isPremium || SubscriptionService().isPremium) {
+    _adWatched = true;
+    await _unlockNextLesson();
+    if (mounted) setState(() => _adWatched = true);
+    return;
+  }
+
+  await AdService().showRewarded(
+    onRewarded: () async {
       await AdService().awardQuizCoins();
       await _unlockNextLesson();
-      // ── Sync coins to backend ──
       await ApiService.addCoins(AdService.coinsPerQuiz);
       if (mounted) setState(() {
         _coins = AdService().coins;
         _adWatched = true;
       });
     },
-      onComplete: () {
-        if (mounted && !_adWatched) setState(() => _adWatched = true);
-      },
-      onNotReady: () {
-        if (mounted) setState(() => _adWatched = true);
-      },
-    );
-  }
+    onComplete: () {
+      if (mounted && !_adWatched) setState(() => _adWatched = true);
+    },
+    onNotReady: () {
+      if (mounted) setState(() => _adWatched = true);
+    },
+  );
+}
 
  Future<void> _unlockNextLesson() async {
   await ProgressService.completeLesson(

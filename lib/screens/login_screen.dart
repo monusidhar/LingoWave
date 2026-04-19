@@ -7,6 +7,7 @@ import '../services/progress_service.dart';
 import '../services/ad_service.dart';
 import 'onboarding_screen.dart';
 import './home_screen.dart';
+import '../services/subscription_service.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -74,55 +75,70 @@ class _LoginScreenState extends State<LoginScreen>
 
     if (result['success']) {
       await ProgressService.resetAll();
-  await AdService.resetCoins();
-  _navigateAfterAuth();
+      await AdService.resetCoins();
+      _navigateAfterAuth();
     } else {
       setState(() => _error = result['message'] ?? 'लॉगिन विफल हुआ');
     }
   }
 
   Future<void> _navigateAfterAuth() async {
-  // ── Clear previous user's local data ──────────────
-  await ProgressService.resetAll();
-  await AdService.resetCoins();
+    // ── Clear previous user's local data ──────────────
+    await ProgressService.resetAll();
+    await AdService.resetCoins();
 
-  // ── Restore this user's progress from backend ──────
-  final progressResult = await ApiService.getUserProgress();
-  print('Progresssssssssssssssssssssssss from backend: ${progressResult}');
-
-  if (progressResult['success'] &&
-      progressResult['data'] != null) {
-    final progressData = progressResult['data'] as List<dynamic>;
-    if (progressData.isNotEmpty) {
-      await ProgressService.restoreProgressFromBackend(progressData);
+    // ── Link RevenueCat to user ───────────────────────
+    final user = await ApiService.getUser();
+    if (user != null && user['id'] != null) {
+      await SubscriptionService().setUserId(user['id'].toString());
     }
+
+    // ── Restore premium status ────────────────────────
+    final isPremium = await ApiService.getPremiumStatus();
+    if (isPremium) {
+      await SubscriptionService().activateTestPremium();
+    } else {
+      await SubscriptionService().checkPremiumStatus();
+    }
+
+    // ── After premium restore ─────────────────────────  ← ADD HERE
+    if (SubscriptionService().isPremium) {
+      print('Premium restored for user!');
+    }
+
+    // ── Restore progress from backend ─────────────────
+    final progressResult = await ApiService.getUserProgress();
+    if (progressResult['success'] && progressResult['data'] != null) {
+      final progressData = progressResult['data'] as List<dynamic>;
+      if (progressData.isNotEmpty) {
+        await ProgressService.restoreProgressFromBackend(progressData);
+      }
+    }
+
+    // ── Load user name ─────────────────────────────────
+    final userName = user?['name'] ?? 'दोस्त';
+    await ProgressService.saveUserName(userName);
+
+    final isOnboarded = await _checkIfOnboarded();
+
+    if (!mounted) return;
+    Navigator.of(context).pushAndRemoveUntil(
+      PageRouteBuilder(
+        pageBuilder: (_, __, ___) => isOnboarded
+            ? HomeScreen(userName: userName)
+            : const OnboardingScreen(),
+        transitionsBuilder: (_, anim, __, child) =>
+            FadeTransition(opacity: anim, child: child),
+        transitionDuration: const Duration(milliseconds: 400),
+      ),
+      (route) => false,
+    );
   }
 
-  // ── Load user name ─────────────────────────────────
-  final user = await ApiService.getUser();
-  final userName = user?['name'] ?? 'दोस्त';
-  await ProgressService.saveUserName(userName);
-
-  final isOnboarded = await _checkIfOnboarded();
-
-  if (!mounted) return;
-  Navigator.of(context).pushAndRemoveUntil(
-    PageRouteBuilder(
-      pageBuilder: (_, __, ___) => isOnboarded
-          ? HomeScreen(userName: userName)
-          : const OnboardingScreen(),
-      transitionsBuilder: (_, anim, __, child) =>
-          FadeTransition(opacity: anim, child: child),
-      transitionDuration: const Duration(milliseconds: 400),
-    ),
-    (route) => false,
-  );
-}
-
-Future<bool> _checkIfOnboarded() async {
-  final name = await ProgressService.loadUserName();
-  return name.isNotEmpty;
-}
+  Future<bool> _checkIfOnboarded() async {
+    final name = await ProgressService.loadUserName();
+    return name.isNotEmpty;
+  }
 
   Future<void> _handleGoogleSignIn() async {
     setState(() {
@@ -151,11 +167,11 @@ Future<bool> _checkIfOnboarded() async {
       setState(() => _loading = false);
 
       if (result['success']) {
-      // Clear previous user data
-      await ProgressService.resetAll();
-  await AdService.resetCoins();
-  _navigateAfterAuth();
-    } else {
+        // Clear previous user data
+        await ProgressService.resetAll();
+        await AdService.resetCoins();
+        _navigateAfterAuth();
+      } else {
         setState(() => _error = result['message'] ?? 'Google login failed');
       }
     } catch (e) {
@@ -536,9 +552,9 @@ class _SignupScreenState extends State<SignupScreen> {
     setState(() => _loading = false);
 
     if (result['success']) {
-       // Clear any previous user data
-  await ProgressService.resetAll();
-  await AdService.resetCoins();
+      // Clear any previous user data
+      await ProgressService.resetAll();
+      await AdService.resetCoins();
       // New user → go to onboarding
       Navigator.of(context).pushAndRemoveUntil(
         PageRouteBuilder(

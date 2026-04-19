@@ -1,4 +1,4 @@
-package com.example.lingowave
+package com.mohit.lingowave
 
 import io.flutter.embedding.android.FlutterActivity
 

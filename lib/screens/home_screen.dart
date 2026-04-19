@@ -9,6 +9,9 @@ import '../services/api_service.dart';
 import '../screens/login_screen.dart';
 import '../screens/leaderboard_screen.dart';
 import '../services/ad_service.dart';
+import '../services/subscription_service.dart';
+import '../screens/premium_screen.dart';
+
 
 class HomeScreen extends StatefulWidget {
   final String userName;
@@ -114,11 +117,14 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   /// A chapter is accessible if:
   /// - It's chapter 1 (always open), OR
   /// - The previous chapter in the list is fully completed
-  bool _isChapterAccessible(int listIndex) {
-    if (listIndex == 0) return true;
-    final prev = _chapters[listIndex - 1];
-    return prev.isFullyCompleted;
-  }
+bool _isChapterAccessible(int listIndex) {
+  // Premium users — all chapters unlocked!
+  if (SubscriptionService().isPremium) return true;
+  
+  if (listIndex == 0) return true;
+  final prev = _chapters[listIndex - 1];
+  return prev.isFullyCompleted;
+}
 
   /// Find the active chapter — the first one that is accessible but not complete
   int _activeChapterIndex() {
@@ -818,6 +824,69 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           ),
 
           const SizedBox(height: AppSpacing.md),
+          // ── Premium Button ────────────────────────────────────
+if (!SubscriptionService().isPremium) ...[
+  SizedBox(
+    width: double.infinity,
+    child: ElevatedButton.icon(
+      onPressed: () async {
+        final result = await Navigator.push<bool>(
+          context,
+          MaterialPageRoute(
+            builder: (_) => const PremiumScreen(),
+          ),
+        );
+        if (result == true) {
+          _loadAll(); // Refresh after purchase
+        }
+      },
+      icon: const Text('💎', style: TextStyle(fontSize: 18)),
+      label: const Text(
+        'Premium लें — ₹499',
+        style: TextStyle(
+          fontFamily: 'Nunito',
+          fontWeight: FontWeight.w700,
+          fontSize: 15,
+        ),
+      ),
+      style: ElevatedButton.styleFrom(
+        backgroundColor: const Color(0xFF7C3AED),
+        padding: const EdgeInsets.symmetric(vertical: 14),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppRadius.full),
+        ),
+      ),
+    ),
+  ),
+  const SizedBox(height: AppSpacing.md),
+] else ...[
+  Container(
+    padding: const EdgeInsets.all(AppSpacing.md),
+    decoration: BoxDecoration(
+      gradient: const LinearGradient(
+        colors: [Color(0xFF4F46E5), Color(0xFF7C3AED)],
+      ),
+      borderRadius: BorderRadius.circular(AppRadius.lg),
+    ),
+    child: const Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Text('💎', style: TextStyle(fontSize: 20)),
+        SizedBox(width: 8),
+        Text(
+          'Premium सदस्य',
+          style: TextStyle(
+            fontFamily: 'Nunito',
+            color: Colors.white,
+            fontWeight: FontWeight.w700,
+            fontSize: 15,
+          ),
+        ),
+      ],
+    ),
+  ),
+  const SizedBox(height: AppSpacing.md),
+],
 
           // ── Logout Button ─────────────────────────────────────────
           SizedBox(
@@ -895,6 +964,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       // ── Clear ALL local data ──────────────────────────
       await ProgressService.resetAll();
       await AdService.resetCoins();
+      await SubscriptionService().clearPremium();
       await ApiService.clearAuth();
 
       if (!mounted) return;
