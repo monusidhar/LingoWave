@@ -52,7 +52,7 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions android = FirebaseOptions(
     apiKey: 'AIzaSyDD4VCa4LqFqFFX3zRcET7Rg_XPl1Ydfik',
-    appId: '1:355406099603:android:6884f6d85c535431d44966',
+    appId: '1:355406099603:android:419e67ce68726200d44966',
     messagingSenderId: '355406099603',
     projectId: 'lingowave-b1d94',
     storageBucket: 'lingowave-b1d94.firebasestorage.app',

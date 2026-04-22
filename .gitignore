@@ -10,6 +10,7 @@ build/
 # Flutter plugin files
 .flutter-plugins
 .flutter-plugins-dependencies
+key.properties
 
 # Generated files
 **/doc/api/
