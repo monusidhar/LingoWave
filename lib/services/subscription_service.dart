@@ -1,4 +1,4 @@
-import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:purchases_flutter/purchases_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'api_service.dart';
@@ -19,23 +19,22 @@ class SubscriptionService {
 
   // ── Initialize ────────────────────────────────────────
   Future<void> initialize() async {
+    // Load cached status first (works on all platforms)
+    final prefs = await SharedPreferences.getInstance();
+    _isPremium = prefs.getBool(_premiumKey) ?? false;
+
+    if (kIsWeb) return; // RevenueCat not supported on web
+
     try {
       await Purchases.setLogLevel(LogLevel.debug);
       final configuration =
           PurchasesConfiguration(_androidApiKey);
       await Purchases.configure(configuration);
 
-      // Load cached status first
-      final prefs = await SharedPreferences.getInstance();
-      _isPremium = prefs.getBool(_premiumKey) ?? false;
-
       // Then check actual status
       await checkPremiumStatus();
     } catch (e) {
       print('SubscriptionService init error: $e');
-      // Fallback to local
-      final prefs = await SharedPreferences.getInstance();
-      _isPremium = prefs.getBool(_premiumKey) ?? false;
     }
   }
 

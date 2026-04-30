@@ -55,13 +55,16 @@ class AdService {
   // ══════════════════════════════════════════════════════════════════════════
 
   Future<void> initialize() async {
-    await MobileAds.instance.initialize();
     await _loadState();
 
     // ── Sync premium from SubscriptionService ────────────
     if (SubscriptionService().isPremium) {
       _isPremium = true;
     }
+
+    if (kIsWeb) return; // AdMob not supported on web
+
+    await MobileAds.instance.initialize();
 
     if (!_isPremium) {
       _preloadInterstitial();

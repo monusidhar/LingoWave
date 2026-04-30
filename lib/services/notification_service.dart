@@ -2,6 +2,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 
 // Background message handler — must be top level function
 @pragma('vm:entry-point')
@@ -28,6 +29,8 @@ class NotificationService {
 
   // ── Initialize ─────────────────────────────────────────────────────────────
   Future<void> initialize() async {
+    if (kIsWeb) return; // FCM push + local notifications not fully supported on web
+
     // Set background handler
     FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
 
