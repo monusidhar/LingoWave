@@ -1,73 +1,205 @@
-Project: Lingowave
-Date: March 17, 2026
+Project: LingoWave
+Last analyzed: June 21, 2026 (verified against source)
+Version: 1.0.2+4  |  Android package: com.mohit.lingowave  |  minSdk 24, targetSdk 36
 
 Workspace Structure Overview:
 Project Name: LingoWave
 Description: LingoWave - Hindi se English seekho. Learn English from Hindi.
 
----
+===============================================================================
+NOTE ON THIS FILE
+-------------------------------------------------------------------------------
+This is a corrected/expanded version of the original context.txt. The earlier
+file listed several technologies that are NOT actually used in the code (see
+"Declared-but-Unused Dependencies" below). Everything here was verified directly
+against lib/ source on June 21, 2026.
+===============================================================================
 
 Purpose
 -------
-LingoWave is a mobile app for Hindi speakers to learn English. It provides structured lessons, quizzes, and progress tracking, with gamification elements like XP, coins, and leaderboards. The app supports premium features, ads, notifications, and uses Firebase for backend services.
+LingoWave is a Flutter mobile app (primarily Android) that teaches English to
+Hindi speakers. All lesson content is bilingual (Hindi + English). It offers 45
+structured chapters of lessons + quizzes, gamification (XP, coins, streaks,
+levels, leaderboard), a premium subscription (RevenueCat), ad monetization
+(AdMob), and push/local notifications.
+
+IMPORTANT: The app is backed by a CUSTOM REST BACKEND, not Firebase data.
+Firebase is used ONLY for Cloud Messaging (push). The real backend is:
+    https://lingowave-backend-production.up.railway.app   (hosted on Railway)
+It handles auth (JWT), user profile, XP/coins, streaks, lesson completion,
+leaderboard, and premium status. See lib/services/api_service.dart.
 
 Main Features
 -------------
-- User Authentication: Google Sign-In and custom login.
-- Onboarding: Guided onboarding for new users.
-- Lessons: 45+ chapters, each with data, widgets, and quizzes.
-- Progress Tracking: XP, coins, streaks, and levels.
-- Leaderboard: Compete with other users.
-- Premium Subscription: Unlocks extra features via RevenueCat.
-- Ads: Google Mobile Ads for monetization.
-- Notifications: Firebase Cloud Messaging and local notifications.
-- Audio/Speech: Text-to-speech, speech recognition, and audio playback.
-- Theming: Custom color palette and theming.
-- Animations: Lottie and confetti for UI effects.
+- Authentication: Email/password (signup, login, forgot-password with email
+  code, reset-password) AND Google Sign-In. JWT token + user JSON stored locally
+  in SharedPreferences. Backend endpoints under /auth/*.
+- Onboarding: Collects user name/level for new users (onboarding_screen.dart).
+- Lessons: 45 chapters. Each chapter = a data file (content) + a widgets file
+  (custom UI per chapter) + one or more quizzes. Lesson count per chapter varies
+  (3 to 18+). Content types include grammar, vocab, dictionaries, conversations,
+  interviews, idioms, passages, test papers.
+- Quizzes: Multiple-choice (QuizQuestion model: bilingual question, options,
+  correctIndex, explanation). Each chapter ends with a Chapter Final Quiz worth
+  bonus XP. Score screen shows results.
+- Progress Tracking: XP, coins, daily streaks, levels. Stored BOTH locally
+  (SharedPreferences via ProgressService) AND on the backend; backend is the
+  source of truth on Home, local acts as offline backup / restore.
+- Gamification & Coins (lib/services/ad_service.dart):
+    coinsPerAd = 10 (rewarded ad)
+    coinsPerQuiz = 2
+    coinsPerDailyLogin = 1
+    chapterUnlockCost = 10 coins
+- Chapter gating: Chapter 1 always open. A later chapter unlocks when the
+  PREVIOUS chapter is fully completed, OR the user is premium (premium unlocks
+  all). AdService also supports coin-based chapter unlock.
+- Leaderboard: Backend-driven ranking (/users/leaderboard).
+- Premium Subscription: Via RevenueCat (purchases_flutter). Entitlement id
+  "premium". On purchase/restore, premium flag is cached locally and pushed to
+  backend (/users/premium). Premium removes ads and unlocks all chapters.
+- Ads: AdMob banner, interstitial, and rewarded (rewarded = coin source).
+  Skipped entirely for premium users and on web.
+- Notifications: Firebase Cloud Messaging (push) + flutter_local_notifications.
+  Includes a daily streak reminder (Hindi text, repeats daily).
+- Audio: Text-to-speech (flutter_tts) is used for pronunciation. NOTE: speech
+  recognition (speech_to_text) and audioplayers are NOT actually wired up.
+- Animations: confetti (celebration effects). NOTE: Lottie is NOT used despite
+  being a declared dependency.
+- Theming: Centralized in lib/theme/app_theme.dart (AppColors, AppSpacing,
+  AppRadius). Primary brand colors ~ #4F46E5 (indigo) / #6D28D9 (violet).
+  Fonts: Poppins + Nunito.
 
 Main Modules & Structure
------------------------
-- lib/main.dart: App entry point, initializes Firebase, subscriptions, ads, and notifications.
-- lib/screens/: Main UI screens (splash, login, onboarding, home, leaderboard, premium).
-- lib/data/: Lesson and chapter data files.
-- lib/models/: Data models (e.g., lesson_model.dart for lesson types).
-- lib/services/: Core services (API, ads, notifications, subscriptions, progress).
-- lib/widgets/: Reusable widgets (XP bar, ads, lesson widgets, etc.).
-- lib/theme/: App theming and color definitions.
+------------------------
+- lib/main.dart: Entry point. Locks portrait, sets system UI, initializes
+  Firebase, then SubscriptionService -> AdService -> NotificationService, then
+  runs LingoWaveApp (MaterialApp, home = SplashScreen). Uses plain MaterialApp +
+  Navigator (NOT go_router).
+- lib/firebase_options.dart: Generated Firebase config.
+- lib/screens/: Top-level screens
+    splash_screen.dart       - auth check + animated splash, routes to Home/Login
+    login_screen.dart        - login/signup/forgot/reset + Google sign-in (large)
+    onboarding_screen.dart   - new-user info collection
+    home_screen.dart         - main dashboard: 3 tabs (Home/Progress/Profile) via
+                               IndexedStack + bottom nav; loads chapters + backend
+                               profile/stats/streak
+    leaderboard_screen.dart  - rankings
+    premium_screen.dart      - RevenueCat purchase flow
+- lib/home/: Lesson-playing flow (separate from lib/screens/)
+    chapter_detail_screen.dart - lesson list for a chapter
+    lesson_screen.dart         - renders a lesson
+    quiz_screen.dart           - runs a quiz
+    score_screen.dart          - post-quiz results
+- lib/data/: chapter1_data.dart .. chapter45_data.dart
+    chapter1_data.dart imports ALL other chapter data files and exposes
+    `Chapter1Data.chapters` (List<ChapterModel>) = the full 45-chapter registry
+    consumed by HomeScreen.
+- lib/models/lesson_model.dart: Single model file. Contains:
+    enum LessonType    - one giant enum, one entry per individual lesson across
+                         all 45 chapters (the canonical lesson catalog)
+    enum LessonStatus  - locked / inProgress / completed
+    class LessonModel  - id, title, titleHindi, emoji, type, status, xp, totalXP
+    class ChapterModel - id, title, titleHindi, description, lessons[], status,
+                         + progress/totalXP/earnedXP/isFullyCompleted getters
+    class QuizQuestion - questionEn, questionHi, options, correctIndex, explanation
+- lib/services/:
+    api_service.dart          - all REST calls to Railway backend (uses `http`
+                                package, NOT dio). Static methods + SharedPreferences
+                                token/user storage.
+    progress_service.dart     - local progress in SharedPreferences (lw_ prefix):
+                                lesson status/xp, chapter status, streak, total XP,
+                                user name/level; restore-from-backend helpers.
+    ad_service.dart           - AdMob banner/interstitial/rewarded + coin economy +
+                                coin-based chapter unlock. Singleton.
+    subscription_service.dart - RevenueCat init, premium check/purchase/restore.
+                                Singleton. Has activateTestPremium() dev helper.
+    notification_service.dart - FCM background/foreground handling + local
+                                notifications + daily streak reminder. Singleton.
+- lib/widgets/:
+    common_widgets.dart  - shared reusable UI (XP bar, cards, buttons, etc.)
+    ad_widgets.dart      - banner ad widget (LingoBannerAd), self-hides on failure
+    lesson/chapterN_widgets.dart - per-chapter custom lesson UI (chapter1..45)
+- lib/theme/app_theme.dart: theme, colors, spacing, radius constants.
 
-Key Dependencies
-----------------
-- State Management: Riverpod, Provider
-- Navigation: go_router
-- Storage: Hive, Shared Preferences
-- Networking: Dio
-- Auth: Google Sign-In
-- Firebase: Core, Messaging
-- Audio/Speech: flutter_tts, speech_to_text, audioplayers
-- UI/UX: Lottie, confetti, fl_chart, google_fonts, cached_network_image
-- Ads: google_mobile_ads
-- Notifications: flutter_local_notifications
+Backend REST API (api_service.dart) — key endpoints
+----------------------------------------------------
+  POST /auth/signup, /auth/login, /auth/google
+  POST /auth/forgot-password, /auth/reset-password
+  GET  /users/profile               (xp, coins, level)
+  GET  /users/leaderboard
+  POST /users/premium  +  GET /users/premium/status
+  POST /coins/streak  (daily streak)  ,  POST /coins/add
+  POST /lessons/{id}/complete  (score, chapterId -> xpEarned)
+  GET  /lessons/stats  (completedLessons)  ,  GET /lessons/progress
+  Auth via `Authorization: Bearer <token>`. Most calls have ~5-10s timeouts and
+  fail soft (return {'success': false}).
 
-Notable Configuration
----------------------
-- Firebase: Used for messaging and backend integration.
-- RevenueCat: Used for managing premium subscriptions.
-- AdMob: Monetization via banner, interstitial, and rewarded ads.
-- Local Storage: User progress and tokens stored locally.
-- Theming: Centralized in lib/theme/app_theme.dart.
+Actually-Used Dependencies
+--------------------------
+- UI/Fonts:        google_fonts, cupertino_icons, custom Poppins/Nunito fonts
+- Networking:      http  (NOT dio)
+- Local storage:   shared_preferences  (NOT hive)
+- State mgmt:      plain StatefulWidget + setState  (NOT Riverpod/Provider)
+- Navigation:      Navigator  (NOT go_router)
+- Auth:            google_sign_in
+- Firebase:        firebase_core, firebase_messaging (push only)
+- Speech:          flutter_tts (text-to-speech)
+- Ads:             google_mobile_ads
+- Notifications:   flutter_local_notifications
+- Purchases:       purchases_flutter (RevenueCat)
+- Effects:         confetti
+- Utils:           intl
+
+Declared-but-Unused Dependencies (in pubspec.yaml, NOT imported in lib/)
+------------------------------------------------------------------------
+These are listed in pubspec but have zero imports in the code as of this audit:
+  go_router, hive, hive_flutter, flutter_riverpod, provider, dio, fl_chart,
+  speech_to_text, audioplayers, lottie, cached_network_image,
+  purchases_ui_flutter
+(Consider removing them or implementing the intended features. The original
+context.txt incorrectly presented these as part of the active stack.)
+
+Notable Configuration / Secrets-in-code (review before release)
+---------------------------------------------------------------
+- RevenueCat Android key in subscription_service.dart is a TEST key
+  ('test_ryybUOiJWJAcDXCqlyffgiGUxAd'); replace with production key.
+- AdMob (ad_service.dart): banner + interstitial use REAL unit ids
+  (ca-app-pub-2863444084543307/...), but the REWARDED ad still uses Google's
+  TEST id (ca-app-pub-3940256099942544/5224354917) — must be replaced.
+- api_service.dart contains many print() statements logging tokens / responses
+  (debug noise; remove for production).
+- AndroidManifest declares only INTERNET permission; AdMob APPLICATION_ID meta
+  is present. No POST_NOTIFICATIONS permission declared (Android 13+ may need it
+  for notifications to show reliably).
 
 Assets
 ------
-- assets/animations/: Lottie files for UI animations.
-- assets/audio/: Audio files for lessons.
-- assets/data/: Data files for lessons.
-- assets/fonts/: Custom fonts.
-- assets/images/: App images and icons.
+- assets/images/      app images and icons
+- assets/fonts/       Poppins + Nunito families
+- assets/animations/  (declared; Lottie not currently used in code)
+- assets/audio/       audio files
+- assets/data/        data files
 
-Project Bootstrapping
----------------------
-- SplashScreen: Handles initial auth check and navigation.
-- HomeScreen: Main dashboard for lessons and user stats.
-- PremiumScreen: Handles premium purchase flow.
-- LeaderboardScreen: Displays user rankings.
-- OnboardingScreen: Collects user info and guides new users.
+App Bootstrapping / Navigation Flow
+-----------------------------------
+  main() -> init Firebase, Subscription, Ads, Notifications -> SplashScreen
+  SplashScreen: if logged in -> updateStreak + schedule reminder -> HomeScreen
+                else -> LoginScreen
+  HomeScreen tabs: Home (active chapter + chapter list), Progress, Profile.
+  Tapping a chapter -> ChapterDetailScreen -> LessonScreen -> QuizScreen ->
+  ScoreScreen (writes completion to backend + local, unlocks next lesson).
+
+Gaps / Things Possibly Missing or Incomplete (for follow-up)
+------------------------------------------------------------
+1. Speech recognition & audio playback features implied by deps are unimplemented.
+2. No charts (fl_chart unused) although a Progress tab exists — progress is shown
+   without graphs.
+3. FCM token is logged but _saveFcmToken() is a stub ("We'll add this API
+   endpoint later") — tokens are NOT persisted to backend yet.
+4. State management is ad-hoc setState; no shared store despite Riverpod/Provider
+   being declared. Backend + local progress can drift out of sync.
+5. Test/placeholder keys (RevenueCat test key, AdMob test rewarded id) still in
+   code — blockers for monetization in production.
+6. Streak logic exists in BOTH ApiService (backend) and ProgressService (local);
+   ensure they don't conflict.
+7. iOS: RevenueCat key is Android-only; no iOS API key configured.

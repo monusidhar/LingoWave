@@ -41,8 +41,9 @@ class _SplashScreenState extends State<SplashScreen>
     final isLoggedIn = await ApiService.isLoggedIn();
 
     if (isLoggedIn) {
-      // ── Update streak every time app opens ──
-      await ApiService.updateStreak();
+      // Streak is updated by HomeScreen._loadAll() right after navigation, so
+      // we don't call updateStreak() here too (it would hit the endpoint twice
+      // on every launch). Just (re)schedule the daily reminder.
       await NotificationService().scheduleDailyStreakReminder();
 
       final userName = await ProgressService.loadUserName();

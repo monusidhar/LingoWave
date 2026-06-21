@@ -5,6 +5,7 @@ import '../theme/app_theme.dart';
 import '../services/api_service.dart';
 import '../services/progress_service.dart';
 import '../services/ad_service.dart';
+import '../services/notification_service.dart';
 import 'onboarding_screen.dart';
 import './home_screen.dart';
 import '../services/subscription_service.dart';
@@ -22,6 +23,10 @@ class _LoginScreenState extends State<LoginScreen>
   final _passwordController = TextEditingController();
   final GoogleSignIn _googleSignIn = GoogleSignIn(
     scopes: ['email', 'profile'],
+    // Web client ID from google-services.json (oauth_client, client_type 3).
+    // Required so Google returns an idToken the backend can verify.
+    serverClientId:
+        '355406099603-dmnv80f1281u65nob6h2300i4hg7r0o5.apps.googleusercontent.com',
   );
   bool _obscure = true;
   bool _loading = false;
@@ -106,6 +111,9 @@ class _LoginScreenState extends State<LoginScreen>
       print('Premium restored for user!');
     }
 
+    // ── Register this device's push token now that we're authenticated ──
+    await NotificationService().registerTokenWithBackend();
+
     // ── Restore progress from backend ─────────────────
     final progressResult = await ApiService.getUserProgress();
     if (progressResult['success'] && progressResult['data'] != null) {
@@ -157,11 +165,18 @@ class _LoginScreenState extends State<LoginScreen>
         return;
       }
 
-      final result = await ApiService.googleSignIn(
-        email: account.email,
-        name: account.displayName ?? 'User',
-        googleId: account.id,
-      );
+      // Get the verifiable ID token; the backend validates this with Google.
+      final auth = await account.authentication;
+      final idToken = auth.idToken;
+      if (idToken == null) {
+        setState(() {
+          _loading = false;
+          _error = 'Google sign-in failed (no token). Please try again.';
+        });
+        return;
+      }
+
+      final result = await ApiService.googleSignIn(idToken: idToken);
 
       if (!mounted) return;
       setState(() => _loading = false);

@@ -7,6 +7,8 @@ import '../services/ad_service.dart';
 import '../services/progress_service.dart';
 import '../services/api_service.dart';
 import '../services/subscription_service.dart';
+import '../data/chapter1_data.dart';
+import 'chapter_detail_screen.dart';
 
 class ScoreScreen extends StatefulWidget {
   final int score, total, xpEarned;
@@ -35,6 +37,8 @@ class _ScoreScreenState extends State<ScoreScreen>
 
   bool _adShown = false;
   bool _adWatched = false;
+  bool _coinsEarned = false; // true only once the bonus ad has actually paid out
+  bool _rewardedJustShown = false; // a rewarded ad actually displayed this screen
   int _coins = 0;
 
   static const _quizTypes = [
@@ -106,46 +110,58 @@ class _ScoreScreenState extends State<ScoreScreen>
       Future.delayed(const Duration(milliseconds: 300), () => _cc.play());
     }
 
-    // Show rewarded ad after lesson completion for free users
+    // ── Save completion + unlock the next lesson IMMEDIATELY on quiz finish ──
+    // This must NEVER depend on an ad. Rewarded ads don't have 100% fill, so
+    // gating progression behind them strands free users (lesson not saved, no
+    // XP, next lesson stuck locked). Completion is recorded the moment they
+    // reach this screen; the rewarded ad below is a pure bonus.
+    //
+    // Chapter Final Quizzes, however, must be PASSED (>= 60%, the same _ipa
+    // threshold the unlock banner/button use) — otherwise failing the final
+    // quiz would still mark the chapter complete and unlock the NEXT chapter.
+    // Regular lessons stay lenient (complete on any score), matching the
+    // existing "retry on fail / advance on pass" UI.
+    if (!_isCQ || _ipa) {
+      _adWatched = true; // unlock is real now, so the "next lesson" banner is honest
+      _unlockNextLesson();
+    }
+
+    // For free users on a normal lesson, offer an OPTIONAL bonus rewarded ad.
+    // It may fail to load or be dismissed early — that no longer affects progress.
     if (!AdService().isPremium && !_isCQ) {
       Future.delayed(const Duration(milliseconds: 500), _showLessonRewardedAd);
-    } else {
-      // For premium or chapter quiz, mark ad as watched so next lesson unlocks immediately and unlock next lesson
-      _adWatched = true;
-      _unlockNextLesson();
     }
   }
 
+  /// OPTIONAL bonus rewarded ad. Completion + next-lesson unlock already
+  /// happened in initState, so every branch here deals only with bonus coins.
+  /// The ad is free to fail (not ready) or be dismissed early without any
+  /// effect on the user's progress.
   Future<void> _showLessonRewardedAd() async {
-  if (_adShown) return;
-  _adShown = true;
+    if (_adShown) return;
+    _adShown = true;
 
-  // ── Skip ads for premium users ────────────────────
-  if (AdService().isPremium || SubscriptionService().isPremium) {
-    _adWatched = true;
-    await _unlockNextLesson();
-    if (mounted) setState(() => _adWatched = true);
-    return;
+    // Premium users never watch ads (and are already unlocked).
+    if (AdService().isPremium || SubscriptionService().isPremium) return;
+
+    await AdService().showRewarded(
+      onRewarded: () async {
+        // Bonus coins only — never tied to progression.
+        await AdService().awardQuizCoins();
+        await ApiService.addCoins(AdService.coinsPerQuiz);
+        if (mounted) {
+          setState(() {
+            _coins = AdService().coins;
+            _coinsEarned = true;
+          });
+        }
+      },
+      onComplete: () {
+        _rewardedJustShown = true; // a rewarded ad actually displayed
+      },
+      onNotReady: () {},
+    );
   }
-
-  await AdService().showRewarded(
-    onRewarded: () async {
-      await AdService().awardQuizCoins();
-      await _unlockNextLesson();
-      await ApiService.addCoins(AdService.coinsPerQuiz);
-      if (mounted) setState(() {
-        _coins = AdService().coins;
-        _adWatched = true;
-      });
-    },
-    onComplete: () {
-      if (mounted && !_adWatched) setState(() => _adWatched = true);
-    },
-    onNotReady: () {
-      if (mounted) setState(() => _adWatched = true);
-    },
-  );
-}
 
  Future<void> _unlockNextLesson() async {
   await ProgressService.completeLesson(
@@ -170,10 +186,62 @@ class _ScoreScreenState extends State<ScoreScreen>
   }
 }
 
-  Future<void> _maybeShowInterstitial() async {
-    if (_adShown) return;
-    _adShown = true;
-    await AdService().showInterstitial(onComplete: () {});
+  /// Primary button handler. Only reachable when the user passed (_ipa), since
+  /// the button is rendered behind `if (_ipa)`. Possibly shows a revenue
+  /// interstitial (free users, every Nth lesson, never stacked on the rewarded
+  /// that may have just played), then navigates.
+  void _onPrimaryAction() {
+    AdService().maybeShowInterstitial(
+      rewardedJustShown: _rewardedJustShown,
+      onDone: _navigateAfterScore,
+    );
+  }
+
+  void _navigateAfterScore() {
+    if (!mounted) return;
+    if (_isCQ) {
+      if (_isLastChapter) {
+        // Whole course finished — go Home.
+        Navigator.popUntil(context, (route) => route.isFirst);
+      } else {
+        // "Start Chapter N+1" — actually open the next chapter.
+        _goToNextChapter();
+      }
+      return;
+    }
+    // Regular lesson — return to this chapter's lesson list. Robust: match by
+    // route name instead of a fragile pop-count; fall back to Home if missing.
+    Navigator.popUntil(
+      context,
+      (route) =>
+          route.settings.name == ChapterDetailScreen.routeName || route.isFirst,
+    );
+  }
+
+  /// Collapse the lesson flow back to Home, then open the next chapter so the
+  /// back button lands on Home (not the finished quiz).
+  void _goToNextChapter() {
+    final chapters = Chapter1Data.chapters;
+    final currentIndex =
+        chapters.indexWhere((c) => c.id == widget.chapter.id);
+    final nextIndex = currentIndex + 1;
+
+    Navigator.popUntil(context, (route) => route.isFirst);
+
+    if (currentIndex == -1 || nextIndex >= chapters.length) {
+      return; // No next chapter — stay on Home.
+    }
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        settings: const RouteSettings(name: ChapterDetailScreen.routeName),
+        builder: (_) => ChapterDetailScreen(
+          chapter: chapters[nextIndex],
+          colorIndex: nextIndex,
+        ),
+      ),
+    );
   }
 
   @override
@@ -414,34 +482,39 @@ class _ScoreScreenState extends State<ScoreScreen>
                     ]),
                   ),
 
-                  // ── Coins earned banner ─────────────────────────────
-                  const SizedBox(height: AppSpacing.md),
-                  Container(
-                    padding: const EdgeInsets.all(AppSpacing.md),
-                    decoration: BoxDecoration(
-                      color: AppColors.accentGold.withOpacity(0.08),
-                      borderRadius: BorderRadius.circular(AppRadius.lg),
-                      border: Border.all(
-                          color: AppColors.accentGold.withOpacity(0.3)),
-                    ),
-                    child: Row(children: [
-                      const Text('🪙', style: TextStyle(fontSize: 22)),
-                      const SizedBox(width: AppSpacing.md),
-                      Expanded(
-                        child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text('+${AdService.coinsPerQuiz} सिक्के कमाए!',
-                                  style: AppTextStyles.labelLarge
-                                      .copyWith(color: AppColors.accentGold)),
-                              Text(
-                                  'कुल सिक्के: $_coins  •  सिक्कों से अध्याय खोलें',
-                                  style: AppTextStyles.bodyMedium
-                                      .copyWith(fontSize: 12)),
-                            ]),
+                  // ── Coins earned banner — shown ONLY when coins were
+                  //    actually awarded (the bonus rewarded ad paid out).
+                  //    Premium users, chapter quizzes, and failed/unfilled
+                  //    ads earn no coins, so this banner stays hidden. ──────
+                  if (_coinsEarned) ...[
+                    const SizedBox(height: AppSpacing.md),
+                    Container(
+                      padding: const EdgeInsets.all(AppSpacing.md),
+                      decoration: BoxDecoration(
+                        color: AppColors.accentGold.withOpacity(0.08),
+                        borderRadius: BorderRadius.circular(AppRadius.lg),
+                        border: Border.all(
+                            color: AppColors.accentGold.withOpacity(0.3)),
                       ),
-                    ]),
-                  ),
+                      child: Row(children: [
+                        const Text('🪙', style: TextStyle(fontSize: 22)),
+                        const SizedBox(width: AppSpacing.md),
+                        Expanded(
+                          child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text('+${AdService.coinsPerQuiz} सिक्के कमाए!',
+                                    style: AppTextStyles.labelLarge
+                                        .copyWith(color: AppColors.accentGold)),
+                                Text(
+                                    'कुल सिक्के: $_coins  •  सिक्कों से अध्याय खोलें',
+                                    style: AppTextStyles.bodyMedium
+                                        .copyWith(fontSize: 12)),
+                              ]),
+                        ),
+                      ]),
+                    ),
+                  ],
 
                   // ── Chapter quiz unlock banner ──────────────────────
                   if (_isCQ && _ipa) ...[
@@ -516,16 +589,7 @@ class _ScoreScreenState extends State<ScoreScreen>
                                 ? 'होम पर जाएं'
                                 : 'अध्याय ${widget.chapter.id + 1} शुरू करें')
                             : 'पाठ सूची पर जाएं',
-                        onTap: () {
-                          // Pop until we reach the ChapterDetailScreen (lesson listing)
-                          int popCount = 0;
-                          Navigator.popUntil(context, (route) {
-                            popCount++;
-                            // The lesson flow is: Home > ChapterDetailScreen > LessonScreen > QuizScreen > ScoreScreen
-                            // So pop 3 times to reach ChapterDetailScreen
-                            return popCount == 3;
-                          });
-                        },
+                        onTap: _onPrimaryAction,
                         color: AppColors.success,
                         emoji: (_isCQ && !_isLastChapter) ? '🚀' : '📚',
                       ),

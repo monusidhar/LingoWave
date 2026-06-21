@@ -6,6 +6,10 @@ import '../services/progress_service.dart';
 import 'lesson_screen.dart';
 
 class ChapterDetailScreen extends StatefulWidget {
+  /// Stable route name so other screens (e.g. ScoreScreen) can reliably pop
+  /// back to this screen without relying on a fragile pop-count.
+  static const String routeName = 'chapter_detail';
+
   final ChapterModel chapter;
   final int colorIndex;
 

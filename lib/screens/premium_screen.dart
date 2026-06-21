@@ -280,9 +280,12 @@ class _PremiumScreenState extends State<PremiumScreen> {
                         ),
                       ),
                       const SizedBox(height: 4),
-                      const Text(
-                        '₹499',
-                        style: TextStyle(
+                      Text(
+                        // Real, localized price straight from the store product
+                        // so the displayed price always matches what Google
+                        // actually charges (avoids misleading-pricing issues).
+                        _package?.storeProduct.priceString ?? '—',
+                        style: const TextStyle(
                           fontFamily: 'Nunito',
                           color: Colors.white,
                           fontSize: 56,
@@ -315,9 +318,11 @@ class _PremiumScreenState extends State<PremiumScreen> {
                                     AppRadius.full),
                               ),
                             ),
-                            child: const Text(
-                              'अभी खरीदें — ₹499',
-                              style: TextStyle(
+                            child: Text(
+                              _package != null
+                                  ? 'अभी खरीदें — ${_package!.storeProduct.priceString}'
+                                  : 'अभी खरीदें',
+                              style: const TextStyle(
                                 fontFamily: 'Nunito',
                                 fontSize: 16,
                                 fontWeight: FontWeight.w900,

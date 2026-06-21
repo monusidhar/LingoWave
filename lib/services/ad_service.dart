@@ -21,6 +21,8 @@ class AdService {
   static const String _premiumKey = '${_prefix}is_premium';
   static const String _coinsKey = '${_prefix}coins';
   static const String _lastCoinDateKey = '${_prefix}last_coin_date';
+  static const String _lessonsCounterKey =
+      '${_prefix}lessons_since_interstitial';
 
   // ─── Coin Config ──────────────────────────────────────────────────────────
   static const int coinsPerAd = 10;
@@ -28,13 +30,19 @@ class AdService {
   static const int coinsPerDailyLogin = 1;
   static const int chapterUnlockCost = 10;
 
+  // ─── Interstitial frequency (free users only) ─────────────────────────────
+  /// Show an interstitial once every N completed lessons.
+  static const int interstitialEveryNLessons = 3;
+  /// Never show two interstitials closer together than this (anti-stacking).
+  static const Duration _minGapBetweenInterstitials = Duration(seconds: 60);
+
   // ─── AdMob Unit IDs ───────────────────────────────────────────────────────
   // ✅ Your real Ad Unit IDs from AdMob console
   static const String bannerAdUnitId = 'ca-app-pub-2863444084543307/8619814553';
   static const String _interstitialAdId =
       'ca-app-pub-2863444084543307/5768719696';
-  // ⚠️ Replace this with your real Rewarded ad unit ID from AdMob
-  static const String _rewardedAdId = 'ca-app-pub-3940256099942544/5224354917';
+  // Real Rewarded ad unit ID from AdMob (LingoWave)
+  static const String _rewardedAdId = 'ca-app-pub-2863444084543307/7590837090';
 
   // ─── Internal State ───────────────────────────────────────────────────────
   InterstitialAd? _interstitialAd;
@@ -43,6 +51,8 @@ class AdService {
   bool _isRewardedLoading = false;
   bool _isPremium = false;
   int _coins = 0;
+  int _lessonsSinceInterstitial = 0;
+  DateTime? _lastInterstitialShown;
 
   // ─── Getters ──────────────────────────────────────────────────────────────
   bool get isPremium => _isPremium || SubscriptionService().isPremium;
@@ -76,6 +86,7 @@ class AdService {
     final prefs = await SharedPreferences.getInstance();
     _isPremium = prefs.getBool(_premiumKey) ?? false;
     _coins = prefs.getInt(_coinsKey) ?? 0;
+    _lessonsSinceInterstitial = prefs.getInt(_lessonsCounterKey) ?? 0;
     await _awardDailyLoginCoin(prefs);
   }
 
@@ -140,6 +151,48 @@ class AdService {
       },
     );
     await _interstitialAd!.show();
+  }
+
+  /// Call when a free user finishes a lesson. Shows an interstitial every
+  /// [interstitialEveryNLessons]th completion, but NEVER back-to-back with a
+  /// rewarded ad ([rewardedJustShown]) and never within
+  /// [_minGapBetweenInterstitials]. Always invokes [onDone] — immediately if no
+  /// ad is shown, or after the ad is dismissed — so navigation is never blocked.
+  Future<void> maybeShowInterstitial({
+    required bool rewardedJustShown,
+    required VoidCallback onDone,
+  }) async {
+    // Premium users never see interstitials.
+    if (_isPremium || SubscriptionService().isPremium) {
+      onDone();
+      return;
+    }
+
+    _lessonsSinceInterstitial++;
+    await _persistLessonCounter();
+
+    final due = _lessonsSinceInterstitial >= interstitialEveryNLessons;
+    final tooSoon = _lastInterstitialShown != null &&
+        DateTime.now().difference(_lastInterstitialShown!) <
+            _minGapBetweenInterstitials;
+
+    // Not due yet, a rewarded just played, too soon, or no ad ready → skip.
+    // Counter is NOT reset, so it will show at the next eligible completion.
+    if (!due || rewardedJustShown || tooSoon || _interstitialAd == null) {
+      onDone();
+      return;
+    }
+
+    _lessonsSinceInterstitial = 0;
+    _lastInterstitialShown = DateTime.now();
+    await _persistLessonCounter();
+
+    await showInterstitial(onComplete: onDone);
+  }
+
+  Future<void> _persistLessonCounter() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt(_lessonsCounterKey, _lessonsSinceInterstitial);
   }
 
   // ══════════════════════════════════════════════════════════════════════════
@@ -255,6 +308,14 @@ class AdService {
   Future<void> markChapterUnlocked(int chapterId) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('${_prefix}ch${chapterId}_unlocked', true);
+  }
+
+  /// True only if the chapter was explicitly bought with coins. Unlike
+  /// [isChapterUnlocked], this ignores premium / chapter-1 special cases, so
+  /// the Home gate can treat coin-unlocks as an additional access path.
+  Future<bool> isChapterCoinUnlocked(int chapterId) async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getBool('${_prefix}ch${chapterId}_unlocked') ?? false;
   }
 
   // ══════════════════════════════════════════════════════════════════════════

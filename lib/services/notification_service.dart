@@ -3,6 +3,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
+import 'api_service.dart';
 
 // Background message handler — must be top level function
 @pragma('vm:entry-point')
@@ -110,10 +111,28 @@ class NotificationService {
   // ── Save FCM Token to Backend ───────────────────────────────────────────────
   Future<void> _saveFcmToken(String token) async {
     try {
-      // We'll add this API endpoint later
-      print('Saving FCM token: $token');
+      // Only register once authenticated, so the backend can tie the token to
+      // the user. Cold-start (already-logged-in) users are covered here because
+      // their auth token is already persisted; fresh logins call
+      // registerTokenWithBackend() right after authenticating.
+      if (!await ApiService.isLoggedIn()) return;
+      final ok = await ApiService.saveFcmToken(token);
+      if (kDebugMode) print('FCM token registered with backend: $ok');
     } catch (e) {
-      print('Error saving FCM token: $e');
+      if (kDebugMode) print('Error saving FCM token: $e');
+    }
+  }
+
+  /// Registers the current device token with the backend. Call right after a
+  /// successful login/signup. (initialize() already handles users who were
+  /// logged in at cold start.)
+  Future<void> registerTokenWithBackend() async {
+    if (kIsWeb) return;
+    try {
+      final token = await _fcm.getToken();
+      if (token != null) await _saveFcmToken(token);
+    } catch (e) {
+      if (kDebugMode) print('registerTokenWithBackend error: $e');
     }
   }
 

@@ -27,6 +27,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   List<ChapterModel> _chapters = Chapter1Data.chapters;
   int _streak = 0;
 
+  /// Chapter ids the user has unlocked by spending coins. Loaded in _loadAll so
+  /// the synchronous _isChapterAccessible gate can consult it.
+  Set<int> _coinUnlockedChapters = {};
+
   int _totalXPBackend = 0;
   int _coinsBackend = 0;
   int _completedLessonsBackend = 0;
@@ -64,6 +68,16 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       updatedChapters.add(chapter);
     }
     _chapters = updatedChapters;
+
+    // ── Load coin-unlocked chapters (bought with coins stay accessible) ──
+    final coinUnlocked = <int>{};
+    for (final chapter in _chapters) {
+      if (await AdService().isChapterCoinUnlocked(chapter.id)) {
+        coinUnlocked.add(chapter.id);
+      }
+    }
+    _coinUnlockedChapters = coinUnlocked;
+
     // ── Get streak from backend ──────────────────────────
     final streakResult = await ApiService.updateStreak();
     if (streakResult['success'] && streakResult['data'] != null) {
@@ -120,8 +134,12 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 bool _isChapterAccessible(int listIndex) {
   // Premium users — all chapters unlocked!
   if (SubscriptionService().isPremium) return true;
-  
+
   if (listIndex == 0) return true;
+
+  // Unlocked with coins — stays open regardless of previous progress.
+  if (_coinUnlockedChapters.contains(_chapters[listIndex].id)) return true;
+
   final prev = _chapters[listIndex - 1];
   return prev.isFullyCompleted;
 }
@@ -134,6 +152,109 @@ bool _isChapterAccessible(int listIndex) {
       }
     }
     return 0;
+  }
+
+  // ── Coin-based chapter unlock ───────────────────────────────────────────────
+  /// Shown when a user taps a locked chapter. Lets them spend coins to unlock it
+  /// (or watch a rewarded ad to earn coins if they're short).
+  Future<void> _showUnlockChapterDialog(ChapterModel chapter) async {
+    const cost = AdService.chapterUnlockCost;
+    final action = await showDialog<String>(
+      context: context,
+      builder: (dialogCtx) {
+        final coins = AdService().coins;
+        final enough = coins >= cost;
+        return AlertDialog(
+          backgroundColor: AppColors.surface,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(AppRadius.lg),
+          ),
+          title: Text('अध्याय ${chapter.id} लॉक है 🔒',
+              style: AppTextStyles.headingLarge),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(chapter.titleHindi, style: AppTextStyles.labelLarge),
+              const SizedBox(height: AppSpacing.sm),
+              Text(
+                enough
+                    ? 'इस अध्याय को अभी $cost सिक्कों में खोलें।'
+                    : 'इसे खोलने के लिए $cost सिक्के चाहिए, लेकिन आपके पास सिर्फ $coins हैं। विज्ञापन देखकर सिक्के कमाएँ।',
+                style: AppTextStyles.bodyMedium,
+              ),
+              const SizedBox(height: AppSpacing.md),
+              Row(children: [
+                const Text('🪙', style: TextStyle(fontSize: 18)),
+                const SizedBox(width: 6),
+                Text('आपके सिक्के: $coins', style: AppTextStyles.labelLarge),
+              ]),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogCtx),
+              child: Text('रद्द करें',
+                  style: TextStyle(color: AppColors.textSecondary)),
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor:
+                    enough ? AppColors.primary : AppColors.accentGold,
+                foregroundColor: Colors.white,
+              ),
+              onPressed: () =>
+                  Navigator.pop(dialogCtx, enough ? 'unlock' : 'earn'),
+              child: Text(enough
+                  ? '$cost सिक्के में खोलें'
+                  : 'विज्ञापन देखें (+${AdService.coinsPerAd} 🪙)'),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (!mounted || action == null) return;
+    if (action == 'unlock') {
+      await _unlockChapterWithCoins(chapter);
+    } else if (action == 'earn') {
+      await _earnCoinsViaAd();
+    }
+  }
+
+  Future<void> _unlockChapterWithCoins(ChapterModel chapter) async {
+    final ok = await AdService().tryUnlockChapter(); // spends coins if enough
+    if (!mounted) return;
+    if (ok) {
+      await AdService().markChapterUnlocked(chapter.id);
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('अध्याय ${chapter.id} खुल गया! 🎉')),
+      );
+      await _loadAll(); // refresh so the card becomes accessible
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('पर्याप्त सिक्के नहीं हैं।')),
+      );
+    }
+  }
+
+  Future<void> _earnCoinsViaAd() async {
+    await AdService().earnCoinsFromAd(
+      onCoinsEarned: () {},
+      onComplete: () {
+        if (mounted) setState(() {}); // refresh coin balance
+      },
+      onAdNotReady: () {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content:
+                Text('विज्ञापन अभी तैयार नहीं है, थोड़ी देर बाद कोशिश करें।'),
+          ),
+        );
+      },
+    );
   }
 
   @override
@@ -341,6 +462,8 @@ bool _isChapterAccessible(int listIndex) {
                 await Navigator.push(
                   context,
                   MaterialPageRoute(
+                    settings: const RouteSettings(
+                        name: ChapterDetailScreen.routeName),
                     builder: (_) => ChapterDetailScreen(
                       chapter: activeChapter,
                       colorIndex: activeIdx,
@@ -455,6 +578,8 @@ bool _isChapterAccessible(int listIndex) {
                           await Navigator.push(
                             context,
                             MaterialPageRoute(
+                              settings: const RouteSettings(
+                                  name: ChapterDetailScreen.routeName),
                               builder: (_) => ChapterDetailScreen(
                                 chapter: _chapters[i],
                                 colorIndex: i,
@@ -463,7 +588,7 @@ bool _isChapterAccessible(int listIndex) {
                           );
                           _loadAll(); // refresh after returning
                         }
-                      : null,
+                      : () => _showUnlockChapterDialog(_chapters[i]),
                 );
               },
               childCount: _chapters.length,

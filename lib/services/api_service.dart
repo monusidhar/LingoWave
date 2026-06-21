@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:async';
@@ -10,6 +11,12 @@ class ApiService {
 
   static const String _tokenKey = 'auth_token';
   static const String _userKey = 'auth_user';
+
+  /// Debug-only logger. Guarded by kDebugMode so auth tokens and raw response
+  /// bodies are never written to logs in release builds.
+  static void _log(Object? message) {
+    if (kDebugMode) print(message);
+  }
 
   // ── Token Management ──────────────────────────────────────────────────────
   static Future<void> saveToken(String token) async {
@@ -70,8 +77,8 @@ class ApiService {
           )
           .timeout(const Duration(seconds: 10));
 
-      print('Signup status: ${res.statusCode}');
-      print('Signup body: ${res.body}');
+      _log('Signup status: ${res.statusCode}');
+      _log('Signup body: ${res.body}');
 
       final data = jsonDecode(res.body);
       if (res.statusCode == 201 || res.statusCode == 200) {
@@ -81,7 +88,7 @@ class ApiService {
       }
       return {'success': false, 'message': data['message'] ?? 'Signup failed'};
     } catch (e) {
-      print('Signup error: $e');
+      _log('Signup error: $e');
       return {'success': false, 'message': 'Connection error: $e'};
     }
   }
@@ -100,8 +107,8 @@ class ApiService {
           )
           .timeout(const Duration(seconds: 10));
 
-      print('Login status: ${res.statusCode}');
-      print('Login body: ${res.body}');
+      _log('Login status: ${res.statusCode}');
+      _log('Login body: ${res.body}');
 
       final data = jsonDecode(res.body);
       if (res.statusCode == 200 || res.statusCode == 201) {
@@ -111,7 +118,7 @@ class ApiService {
       }
       return {'success': false, 'message': data['message'] ?? 'Login failed'};
     } catch (e) {
-      print('Login error: $e');
+      _log('Login error: $e');
       return {
         'success': false,
         'message': 'सर्वर से कनेक्ट नहीं हो पाया। WiFi जांचें।'
@@ -129,6 +136,26 @@ class ApiService {
       return {'success': true, 'data': jsonDecode(res.body)};
     }
     return {'success': false, 'message': 'Failed to load profile'};
+  }
+
+  // ── Save FCM Token to Backend ─────────────────────────────────────────────
+  /// Registers this device's push token against the authenticated user so the
+  /// backend can target them with notifications. Requires a valid auth token
+  /// (uses _authHeaders). Fails soft if the endpoint isn't live yet.
+  static Future<bool> saveFcmToken(String token) async {
+    try {
+      final res = await http
+          .post(
+            Uri.parse('$baseUrl/users/fcm-token'),
+            headers: await _authHeaders(),
+            body: jsonEncode({'fcmToken': token}),
+          )
+          .timeout(const Duration(seconds: 5));
+      return res.statusCode == 200 || res.statusCode == 201;
+    } catch (e) {
+      _log('Save FCM token error: $e');
+      return false;
+    }
   }
 
   // ── Update Streak ─────────────────────────────────────────────────────────
@@ -150,7 +177,7 @@ class ApiService {
       }
       return {'success': false};
     } catch (e) {
-      print('Streak update error: $e');
+      _log('Streak update error: $e');
       return {'success': false};
     }
   }
@@ -173,20 +200,20 @@ class ApiService {
           )
           .timeout(const Duration(seconds: 5));
 
-      print('Complete lesson status: ${res.statusCode}');
-      print('Complete lesson body: ${res.body}');
+      _log('Complete lesson status: ${res.statusCode}');
+      _log('Complete lesson body: ${res.body}');
 
       if (res.statusCode == 200 || res.statusCode == 201) {
         final data = jsonDecode(res.body);
-        final prefs = await SharedPreferences.getInstance();
-        final currentXp = prefs.getInt('lw_total_xp') ?? 0;
-        await prefs.setInt(
-            'lw_total_xp', currentXp + ((data['xpEarned'] ?? 0) as int));
+        // NOTE: the local 'lw_total_xp' counter is owned by
+        // ProgressService.completeLesson, which already incremented it for this
+        // lesson. Do NOT add xpEarned again here, or the local total
+        // double-counts every completion.
         return {'success': true, 'data': data};
       }
       return {'success': false};
     } catch (e) {
-      print('Complete lesson error: $e');
+      _log('Complete lesson error: $e');
       return {'success': false};
     }
   }
@@ -234,7 +261,7 @@ class ApiService {
           )
           .timeout(const Duration(seconds: 5));
     } catch (e) {
-      print('Add coins error: $e');
+      _log('Add coins error: $e');
     }
   }
 
@@ -252,15 +279,13 @@ class ApiService {
       }
       return {'success': false};
     } catch (e) {
-      print('Get stats error: $e');
+      _log('Get stats error: $e');
       return {'success': false};
     }
   }
 
   static Future<Map<String, dynamic>> googleSignIn({
-    required String email,
-    required String name,
-    required String googleId,
+    required String idToken,
   }) async {
     try {
       final res = await http
@@ -268,15 +293,13 @@ class ApiService {
             Uri.parse('$baseUrl/auth/google'),
             headers: {'Content-Type': 'application/json'},
             body: jsonEncode({
-              'email': email,
-              'name': name,
-              'googleId': googleId,
+              'idToken': idToken,
             }),
           )
           .timeout(const Duration(seconds: 10));
 
-      print('Google auth status: ${res.statusCode}');
-      print('Google auth body: ${res.body}');
+      _log('Google auth status: ${res.statusCode}');
+      _log('Google auth body: ${res.body}');
 
       final data = jsonDecode(res.body);
       if (res.statusCode == 200 || res.statusCode == 201) {
@@ -286,7 +309,7 @@ class ApiService {
       }
       return {'success': false, 'message': 'Google login failed'};
     } catch (e) {
-      print('Google sign in error: $e');
+      _log('Google sign in error: $e');
       return {'success': false, 'message': 'कनेक्शन विफल हुआ'};
     }
   }
@@ -305,7 +328,7 @@ class ApiService {
       }
       return {'success': false};
     } catch (e) {
-      print('Leaderboard error: $e');
+      _log('Leaderboard error: $e');
       return {'success': false};
     }
   }
@@ -324,7 +347,7 @@ class ApiService {
       }
       return {'success': false};
     } catch (e) {
-      print('Get progress error: $e');
+      _log('Get progress error: $e');
       return {'success': false};
     }
   }
@@ -342,7 +365,7 @@ class ApiService {
     }
     return {'success': false};
   } catch (e) {
-    print('Set premium error: $e');
+    _log('Set premium error: $e');
     return {'success': false};
   }
 }
@@ -360,7 +383,7 @@ static Future<bool> getPremiumStatus() async {
     }
     return false;
   } catch (e) {
-    print('Get premium status error: $e');
+    _log('Get premium status error: $e');
     return false;
   }
 }

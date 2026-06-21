@@ -171,7 +171,9 @@ class ChapterCard extends StatelessWidget {
         AppColors.chapterColors[colorIndex % AppColors.chapterColors.length];
 
     return GestureDetector(
-      onTap: isLocked ? null : onTap,
+      // Honor onTap even when locked: the Home screen passes a coin-unlock
+      // dialog handler for locked chapters (only the *appearance* stays locked).
+      onTap: onTap,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
         margin: const EdgeInsets.only(bottom: AppSpacing.md),

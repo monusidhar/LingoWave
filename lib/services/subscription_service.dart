@@ -9,8 +9,10 @@ class SubscriptionService {
   factory SubscriptionService() => _instance;
   SubscriptionService._internal();
 
+  // RevenueCat public SDK key for the Google Play app "LingoWave - English
+  // Learning". Safe to ship in the client (public key, not a secret key).
   static const String _androidApiKey =
-      'test_ryybUOiJWJAcDXCqlyffgiGUxAd';
+      'goog_WfTYxdWWHDuyZWoTiyliBfnNMDr';
   static const String _premiumKey = 'lw_is_premium';
   static const String _entitlementId = 'premium';
 
