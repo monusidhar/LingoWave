@@ -2,41 +2,72 @@ Project: Lingowave
 Date: March 17, 2026
 
 Workspace Structure Overview:
-- analysis_options.yaml
-- lingowave.iml
-- pubspec.yaml
-- README.md
-- android/
-- assets/
-- build/
-- ios/
-- lib/
-- linux/
-- macos/
-- test/
-- web/
-- windows/
+Project Name: LingoWave
+Description: LingoWave - Hindi se English seekho. Learn English from Hindi.
 
-Main Dart files:
-- lib/main.dart
-- lib/data/chapter1_data.dart
-- lib/home/chapter_detail_screen.dart
-- lib/home/home_screen.dart
-- lib/home/lesson_screen.dart
-- lib/models/lesson_model.dart
-- lib/screens/home_screen.dart
-- lib/screens/onboarding_screen.dart
-- lib/screens/quiz_screen.dart
-- lib/screens/score_screen.dart
-- lib/screens/splash_screen.dart
-- lib/services/progress_service.dart
-- lib/theme/app_theme.dart
-- lib/widgets/chapter_card.dart
-- lib/widgets/common_widgets.dart
-- lib/widgets/lesson_tile.dart
-- lib/widgets/xp_bar.dart
+---
 
-Test file:
-- test/widget_test.dart
+Purpose
+-------
+LingoWave is a mobile app for Hindi speakers to learn English. It provides structured lessons, quizzes, and progress tracking, with gamification elements like XP, coins, and leaderboards. The app supports premium features, ads, notifications, and uses Firebase for backend services.
 
-Purpose: This file provides a summary of the project structure and key files for context sharing between chats.
+Main Features
+-------------
+- User Authentication: Google Sign-In and custom login.
+- Onboarding: Guided onboarding for new users.
+- Lessons: 45+ chapters, each with data, widgets, and quizzes.
+- Progress Tracking: XP, coins, streaks, and levels.
+- Leaderboard: Compete with other users.
+- Premium Subscription: Unlocks extra features via RevenueCat.
+- Ads: Google Mobile Ads for monetization.
+- Notifications: Firebase Cloud Messaging and local notifications.
+- Audio/Speech: Text-to-speech, speech recognition, and audio playback.
+- Theming: Custom color palette and theming.
+- Animations: Lottie and confetti for UI effects.
+
+Main Modules & Structure
+-----------------------
+- lib/main.dart: App entry point, initializes Firebase, subscriptions, ads, and notifications.
+- lib/screens/: Main UI screens (splash, login, onboarding, home, leaderboard, premium).
+- lib/data/: Lesson and chapter data files.
+- lib/models/: Data models (e.g., lesson_model.dart for lesson types).
+- lib/services/: Core services (API, ads, notifications, subscriptions, progress).
+- lib/widgets/: Reusable widgets (XP bar, ads, lesson widgets, etc.).
+- lib/theme/: App theming and color definitions.
+
+Key Dependencies
+----------------
+- State Management: Riverpod, Provider
+- Navigation: go_router
+- Storage: Hive, Shared Preferences
+- Networking: Dio
+- Auth: Google Sign-In
+- Firebase: Core, Messaging
+- Audio/Speech: flutter_tts, speech_to_text, audioplayers
+- UI/UX: Lottie, confetti, fl_chart, google_fonts, cached_network_image
+- Ads: google_mobile_ads
+- Notifications: flutter_local_notifications
+
+Notable Configuration
+---------------------
+- Firebase: Used for messaging and backend integration.
+- RevenueCat: Used for managing premium subscriptions.
+- AdMob: Monetization via banner, interstitial, and rewarded ads.
+- Local Storage: User progress and tokens stored locally.
+- Theming: Centralized in lib/theme/app_theme.dart.
+
+Assets
+------
+- assets/animations/: Lottie files for UI animations.
+- assets/audio/: Audio files for lessons.
+- assets/data/: Data files for lessons.
+- assets/fonts/: Custom fonts.
+- assets/images/: App images and icons.
+
+Project Bootstrapping
+---------------------
+- SplashScreen: Handles initial auth check and navigation.
+- HomeScreen: Main dashboard for lessons and user stats.
+- PremiumScreen: Handles premium purchase flow.
+- LeaderboardScreen: Displays user rankings.
+- OnboardingScreen: Collects user info and guides new users.
