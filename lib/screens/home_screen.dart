@@ -162,7 +162,9 @@ bool _isChapterAccessible(int listIndex) {
     final action = await showDialog<String>(
       context: context,
       builder: (dialogCtx) {
-        final coins = AdService().coins;
+        // Use the backend balance — the same coins shown in the Home header —
+        // so the dialog and the header are always consistent.
+        final coins = _coinsBackend;
         final enough = coins >= cost;
         return AlertDialog(
           backgroundColor: AppColors.surface,
@@ -223,25 +225,47 @@ bool _isChapterAccessible(int listIndex) {
   }
 
   Future<void> _unlockChapterWithCoins(ChapterModel chapter) async {
-    final ok = await AdService().tryUnlockChapter(); // spends coins if enough
+    const cost = AdService.chapterUnlockCost;
+
+    if (_coinsBackend < cost) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('पर्याप्त सिक्के नहीं हैं।')),
+      );
+      return;
+    }
+
+    // Spend from the backend balance (the same coins shown on Home). The
+    // backend re-checks the balance, so this can't go negative.
+    final result = await ApiService.deductCoins(cost);
     if (!mounted) return;
-    if (ok) {
+
+    if (result['success'] == true) {
       await AdService().markChapterUnlocked(chapter.id);
       if (!mounted) return;
+      setState(() => _coinsBackend =
+          (result['coins'] as int?) ?? (_coinsBackend - cost));
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('अध्याय ${chapter.id} खुल गया! 🎉')),
       );
       await _loadAll(); // refresh so the card becomes accessible
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('पर्याप्त सिक्के नहीं हैं।')),
+        const SnackBar(
+            content: Text('सिक्के काटे नहीं जा सके। दोबारा कोशिश करें।')),
       );
     }
   }
 
   Future<void> _earnCoinsViaAd() async {
     await AdService().earnCoinsFromAd(
-      onCoinsEarned: () {},
+      onCoinsEarned: () async {
+        // Credit the same backend balance the Home header shows.
+        final newBalance = await ApiService.addCoins(AdService.coinsPerAd);
+        if (mounted && newBalance != null) {
+          setState(() => _coinsBackend = newBalance);
+        }
+      },
       onComplete: () {
         if (mounted) setState(() {}); // refresh coin balance
       },

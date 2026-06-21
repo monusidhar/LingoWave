@@ -551,24 +551,24 @@ class Chapter18Data {
   /// Motivational quotes
   static const List<Map<String, String>> motivationalQuotes = [
     {
-      'english': 'Success does not consist in never making mistakes but in never making the same one a second time.',
-      'hindi': 'सफलता इस बात में नहीं है कि कभी गलती न करो, बल्कि इसमें है कि एक ही गलती दोबारा न करो।',
+      'english': 'Mistakes are proof that you are trying.',
+      'hindi': 'गलतियाँ इस बात का सबूत हैं कि तुम कोशिश कर रहे हो।',
       'author': '',
     },
     {
-      'english': 'Times wait for none.',
-      'hindi': 'समय किसी का इंतज़ार नहीं करता।',
+      'english': "Don't stop until you are proud.",
+      'hindi': 'तब तक मत रुको जब तक खुद पर गर्व न हो।',
       'author': '',
     },
     {
-      'english': 'To succeed in your mission, you must have single-minded devotion to your goal.',
-      'hindi': 'अपने मिशन में सफल होने के लिए, आपको अपने लक्ष्य के प्रति एकनिष्ठ समर्पण होना चाहिए।',
+      'english': 'Great things never come from comfort zones.',
+      'hindi': 'महान चीज़ें कभी आराम के दायरे से नहीं आतीं।',
       'author': '',
     },
     {
-      'english': 'Be nice to people on your way up, because you meet them on your way down.',
-      'hindi': 'उपलब्धियों की तरफ बढ़ते हुए जो भी मिले उसे इज्जत दो क्योंकि अगर कभी नीचे आना पड़ा तो आप उन्हीं से मिलोगे।',
-      'author': '',
+      'english': 'Quality is not an act, it is a habit.',
+      'hindi': 'गुणवत्ता एक काम नहीं, एक आदत है।',
+      'author': 'Aristotle',
     },
   ];
 }

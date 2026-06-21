@@ -548,13 +548,13 @@ class Chapter19Data {
   /// Motivational quotes
   static const List<Map<String, String>> motivationalQuotes = [
     {
-      'english': 'We must win the final war irrespective of how many battles we\'ve lost before.',
-      'hindi': 'फर्क नहीं पड़ता कि कितनी लड़ाईयाँ हम पहले हार चुके हैं, हमें अंतिम युद्ध जीतना है।',
-      'author': '',
+      'english': 'Continuous effort, not strength or intelligence, is the key to unlocking our potential.',
+      'hindi': 'निरंतर प्रयास — न कि ताकत या बुद्धि — हमारी क्षमता को खोलने की चाबी है।',
+      'author': 'Winston Churchill',
     },
     {
-      'english': 'Good things come to people who wait, but better things come to those who go out and get them.',
-      'hindi': 'अच्छी चीज़ें उन लोगों के पास आती हैं जो इंतज़ार करते हैं, लेकिन बेहतर चीज़ें उनके पास जो बाहर जाकर उन्हें पाते हैं।',
+      'english': 'The expert in anything was once a beginner.',
+      'hindi': 'हर क्षेत्र का विशेषज्ञ कभी एक शुरुआती ही था।',
       'author': '',
     },
   ];
@@ -1888,8 +1888,8 @@ class Chapter19Data {
 
   /// Motivational quotes for practice/test lessons
   static const List<Map<String, String>> practiceMotivationalQuotes = [
-    {'english': 'Every time you lose, you gain experience.', 'hindi': 'हर बार जब तुम हारते हो, तुम अनुभव प्राप्त करते हो।'},
-    {'english': "Unless you try, you can't say whether you'll succeed or not. So go ahead and try your best.", 'hindi': 'जब तक कोशिश न करो, नहीं कह सकते कि सफल होगे या नहीं। तो आगे बढ़ो और पूरी कोशिश करो।'},
-    {'english': 'Twenty years from now you will be more disappointed by the things that you didn\'t do than by the ones you did do.', 'hindi': 'बीस साल बाद तुम उन चीज़ों से ज़्यादा निराश होगे जो तुमने नहीं कीं, बजाय उनके जो तुमने कीं।'},
+    {'english': "Don't limit your challenges, challenge your limits.", 'hindi': 'अपनी चुनौतियों को सीमित मत करो, अपनी सीमाओं को चुनौती दो।'},
+    {'english': 'The difference between ordinary and extraordinary is that little extra.', 'hindi': 'साधारण और असाधारण के बीच का फर्क बस वही थोड़ा-सा अतिरिक्त प्रयास है।'},
+    {'english': 'Wake up with determination, go to bed with satisfaction.', 'hindi': 'दृढ़ निश्चय के साथ जागो, संतुष्टि के साथ सोओ।'},
   ];
 }

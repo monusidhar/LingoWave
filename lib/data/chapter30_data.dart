@@ -188,7 +188,7 @@ class Chapter30Data {
   ];
 
   static const List<Map<String, String>> motivationalQuotes = [
-    {'english': 'It does not matter how slowly you go as long as you do not stop.', 'hindi': 'इससे कोई फर्क नहीं पड़ता कि तुम कितनी धीरे जाते हो, जब तक रुकते नहीं।'},
-    {'english': 'The secret of getting ahead is getting started.', 'hindi': 'आगे बढ़ने का रहस्य है शुरुआत करना।'},
+    {'english': 'Every accomplishment starts with the decision to try.', 'hindi': 'हर उपलब्धि कोशिश करने के फैसले से शुरू होती है।'},
+    {'english': 'A river cuts through rock not because of its power but its persistence.', 'hindi': 'नदी चट्टान को अपनी ताकत से नहीं, बल्कि अपनी निरंतरता से काटती है।'},
   ];
 }

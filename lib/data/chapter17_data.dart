@@ -693,23 +693,23 @@ class Chapter17Data {
   /// Motivational quotes
   static const List<Map<String, String>> motivationalQuotes = [
     {
-      'english': 'Why to afraid of what\'ll happen in life. Even if nothing happens, experience will be gained.',
-      'hindi': 'क्यों डरें कि जिन्दगी में क्या होगा। कुछ नहीं भी हुआ तो कम से कम तजुर्बा होगा।',
+      'english': 'Do not wait for the perfect moment, take the moment and make it perfect.',
+      'hindi': 'सही पल का इंतज़ार मत करो; जो पल है उसी को सही बना दो।',
       'author': '',
     },
     {
-      'english': 'A man is great by deeds, not by birth.',
-      'hindi': 'व्यक्ति अपने कर्मों से महान बनता है, जन्म से नहीं।',
-      'author': 'Chanakya',
-    },
-    {
-      'english': "Whose fingers you resorted to experience the world; never let their shoulders down.",
-      'hindi': 'जिनकी उँगली पकड़कर तुमने चलना सीखा, उनके कन्धों को कभी झुकने मत देना।',
+      'english': 'Fall seven times, stand up eight.',
+      'hindi': 'सात बार गिरो, तो आठवीं बार उठ खड़े हो।',
       'author': '',
     },
     {
-      'english': 'Unless a man undertakes more than he possibly can, he will never do what he actually can.',
-      'hindi': 'जब तक एक इन्सान उससे ज्यादा करने की कोशिश नहीं करता जितना उसे लगता है, वो कभी उतना नहीं कर पायेगा जितना वो वास्तव में कर सकता है।',
+      'english': 'Work hard in silence, let your success make the noise.',
+      'hindi': 'चुपचाप मेहनत करो, तुम्हारी सफलता खुद शोर मचाएगी।',
+      'author': '',
+    },
+    {
+      'english': 'The harder you work for something, the greater you will feel when you achieve it.',
+      'hindi': 'किसी चीज़ के लिए जितनी ज़्यादा मेहनत करोगे, उसे पाने पर उतनी ही ज़्यादा खुशी होगी।',
       'author': '',
     },
   ];

@@ -149,24 +149,24 @@ class Chapter31Data {
 
   static const List<Map<String, String>> motivationalQuotes = [
     {
-      'english': 'The only way to do great work is to love what you do.',
-      'hindi':   'महान कार्य करने का सिर्फ एक ही तरीका है, आप जो भी करो उसे दिल से करो।',
+      'english': 'Innovation distinguishes between a leader and a follower.',
+      'hindi':   'नवाचार ही एक नेता और एक अनुयायी के बीच का अंतर बताता है।',
       'author':  'Steve Jobs',
     },
     {
-      'english': 'People will forget what you said, people will forget what you did, but people will never forget how you made them feel.',
-      'hindi':   'लोग भूल जायेंगे आपने क्या कहा, लोग भूल जायेंगे आपने क्या किया, पर लोग कभी नहीं भूलेंगे कि आपने उन्हें कैसा महसूस करवाया।',
-      'author':  '',
-    },
-    {
-      'english': 'I am not a product of circumstances. I am a product of my decisions.',
-      'hindi':   'मैं हालातों से निर्मित प्राणी नहीं, मेरा निर्माण मेरे फैसलों से हुआ है।',
-      'author':  '',
-    },
-    {
-      'english': 'When everything seems to be going against you, remember that the airplane takes off against the wind, not with it.',
-      'hindi':   'जब सब कुछ आपके खिलाफ हो रहा हो, तो ये बात याद करना कि हवाईजहाज भी हवा के विरुद्ध ही उड़ान भरता है, उसके साथ नहीं।',
+      'english': "Whether you think you can or you think you can't, you're right.",
+      'hindi':   'चाहे तुम सोचो कि तुम कर सकते हो या नहीं कर सकते — दोनों ही बार तुम सही हो।',
       'author':  'Henry Ford',
+    },
+    {
+      'english': 'The best way to predict the future is to create it.',
+      'hindi':   'भविष्य का अनुमान लगाने का सबसे अच्छा तरीका है उसे खुद बनाना।',
+      'author':  'Abraham Lincoln',
+    },
+    {
+      'english': 'Success usually comes to those who are too busy to be looking for it.',
+      'hindi':   'सफलता अक्सर उन्हें मिलती है जो उसे ढूँढ़ने के बजाय काम में व्यस्त रहते हैं।',
+      'author':  'Henry David Thoreau',
     },
   ];
 

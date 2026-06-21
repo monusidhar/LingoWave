@@ -835,9 +835,9 @@ class Chapter20Data {
 
   /// Motivational quotes
   static const List<Map<String, String>> motivationalQuotes = [
-    {'english': 'There is only one way to avoid criticism: do nothing, say nothing, and be nothing.', 'hindi': 'आलोचना से बचने का सिर्फ एक तरीका है: कुछ मत करो, कुछ मत कहो, और कुछ मत बनो।'},
-    {'english': "You can't make it big unless you try.", 'hindi': 'जब तक कोशिश न करो, बड़ा नहीं बन सकते।'},
-    {'english': 'Failure is better teacher than success, because when you fail, you focus more for the next try.', 'hindi': 'असफलता सफलता से बेहतर शिक्षक है, क्योंकि जब आप असफल होते हैं तो अगली कोशिश पर ज़्यादा ध्यान देते हैं।'},
-    {'english': "You can never cross the ocean until you have the courage to lose sight of the shore.", 'hindi': 'जब तक तट को छोड़ने का साहस न हो, आप कभी समंदर पार नहीं कर सकते।'},
+    {'english': "Don't count the days, make the days count.", 'hindi': 'दिन मत गिनो, हर दिन को सार्थक बनाओ।'},
+    {'english': "Opportunities don't happen, you create them.", 'hindi': 'मौके यूँ ही नहीं मिलते, उन्हें तुम बनाते हो।'},
+    {'english': 'Success is the sum of small efforts repeated day in and day out.', 'hindi': 'सफलता रोज़-रोज़ दोहराए गए छोटे-छोटे प्रयासों का योग है।'},
+    {'english': 'The best time to start was yesterday; the next best time is now.', 'hindi': 'शुरू करने का सबसे अच्छा समय कल था; उसके बाद सबसे अच्छा समय अभी है।'},
   ];
 }

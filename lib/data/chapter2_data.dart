@@ -253,9 +253,9 @@ class Chapter2Data {
   ];
 
   static const List<Map<String, String>> motivationalQuotes = [
-    {'english': "Don't let the fear of losing be greater than the excitement of winning.", 'hindi': 'हारने के डर को जीतने की खुशी से ज्यादा मत बढ़ने दो।'},
-    {'english': 'If you think of something difficult, that means you have not understood it well.', 'hindi': 'अगर आपको कुछ मुश्किल लगता है, तो इसका यही मतलब है कि आपने उसे ढंग से समझा नहीं।'},
-    {"english": "What's the point of being alive if you don't try to do something remarkable.", 'hindi': 'जीवित रहने के क्या मायने अगर आप कुछ असाधारण करने का प्रयत्न न करें।'},
-    {"english": "Don't wish it were easier, wish you were better.", 'hindi': 'ये मत चाहो कि काम आसान हो, बल्कि ये चाहो कि आप बेहतर हो।'},
+    {'english': "Believe you can and you're halfway there.", 'hindi': 'यह विश्वास कर लो कि तुम कर सकते हो, तो आधा काम वहीं पूरा हो जाता है।'},
+    {'english': "Hard work beats talent when talent doesn't work hard.", 'hindi': 'जब प्रतिभा मेहनत नहीं करती, तब मेहनत प्रतिभा को हरा देती है।'},
+    {'english': 'A little progress each day adds up to big results.', 'hindi': 'हर दिन की छोटी प्रगति मिलकर बड़े नतीजे बनाती है।'},
+    {'english': 'Your only limit is the one you set in your mind.', 'hindi': 'तुम्हारी एकमात्र सीमा वही है जो तुमने अपने ही मन में बना रखी है।'},
   ];
 }

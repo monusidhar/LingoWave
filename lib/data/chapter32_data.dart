@@ -353,17 +353,17 @@ class Chapter32Data {
   // ══════════════════════════════════════════════════════════════════════════
 
   static const List<Map<String, String>> motivationalQuotes = [
-    {'english': 'When I dare to be powerful - to use my strength in the service of my vision, then it becomes less and less important whether I am afraid.', 'author': ''},
-    {'english': 'If you genuinely want something, don\'t wait for it -- teach yourself to be impatient.', 'author': ''},
-    {'english': 'Your efforts today make your tomorrow, so make your every today count.', 'author': ''},
-    {'english': 'If you want to make a permanent change, stop focusing on the size of your problems and start focusing on the size of you.', 'author': ''},
-    {'english': 'The greatest mistake you can make in life is to be afraid you will make a mistake.', 'author': ''},
-    {'english': 'If you do what you always did, you will get what you always got.', 'author': ''},
-    {'english': 'All what we are, is the result of what we have thought.', 'author': ''},
-    {'english': 'Great minds discuss ideas; average minds discuss events; small minds discuss people.', 'author': ''},
-    {'english': 'To be a great champion you must believe you are the best. If you\'re not, pretend you are.', 'author': 'Muhammad Ali'},
-    {'english': 'Life is 10% what happens to me and 90% of how I react to it.', 'author': ''},
-    {'english': 'What seems to us as bitter trials are often blessings in disguise.', 'author': ''},
+    {'english': 'The way to get started is to quit talking and begin doing.', 'author': 'Walt Disney'},
+    {'english': "Your time is limited, so don't waste it living someone else's life.", 'author': 'Steve Jobs'},
+    {'english': 'If life were predictable it would cease to be life, and be without flavor.', 'author': 'Eleanor Roosevelt'},
+    {'english': 'Spread love everywhere you go. Let no one ever come to you without leaving happier.', 'author': 'Mother Teresa'},
+    {'english': 'When you reach the end of your rope, tie a knot in it and hang on.', 'author': 'Franklin D. Roosevelt'},
+    {'english': 'The future belongs to those who believe in the beauty of their dreams.', 'author': 'Eleanor Roosevelt'},
+    {'english': 'Tell me and I forget. Teach me and I remember. Involve me and I learn.', 'author': 'Benjamin Franklin'},
+    {'english': 'It is during our darkest moments that we must focus to see the light.', 'author': 'Aristotle'},
+    {'english': 'Whoever is happy will make others happy too.', 'author': 'Anne Frank'},
+    {'english': 'Do not go where the path may lead, go instead where there is no path and leave a trail.', 'author': 'Ralph Waldo Emerson'},
+    {'english': 'You will face many defeats in life, but never let yourself be defeated.', 'author': 'Maya Angelou'},
   ];
 
   // ══════════════════════════════════════════════════════════════════════════

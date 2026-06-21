@@ -289,13 +289,13 @@ class Chapter39Data {
   // ══════════════════════════════════════════════════════════════════════════
 
   static const List<String> motivationalQuotes = [
-    'There is only one way to avoid criticism: do nothing, say nothing, and be nothing. So remember, if you are criticized, never be afraid.',
-    "You can't make it big unless you try.",
-    'Every time you lose, you gain experience.',
-    "Unless you try, you can't say whether you'll succeed or not. So go ahead and try your best.",
-    'Failure is better teacher than success, because when you fail, you tend to focus more for the next try.',
-    'You can never cross the ocean until you have the courage to lose sight of the shore.',
-    'The best revenge is massive success.',
+    'Success is not how high you have climbed, but how you make a positive difference to the world.',
+    "Don't be pushed around by the fears in your mind. Be led by the dreams in your heart.",
+    'The man who has confidence in himself gains the confidence of others.',
+    'A goal without a plan is just a wish.',
+    'Your passion is waiting for your courage to catch up.',
+    'Difficulties in life are intended to make us better, not bitter.',
+    'Do something today that your future self will thank you for.',
   ];
 
   // ══════════════════════════════════════════════════════════════════════════

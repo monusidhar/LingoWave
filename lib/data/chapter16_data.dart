@@ -1618,29 +1618,29 @@ class Chapter16Data {
   // ══════════════════════════════════════════════════════════════════════════
   static const List<Map<String, String>> motivationalQuotes = [
     {
-      'english': 'Living is not enough, what matters is how you live.',
-      'hindi': 'जीना काफी नहीं है, मायने ये रखता है कि आप जीते कैसे हैं।',
+      'english': 'The future depends on what you do today.',
+      'hindi': 'भविष्य इस बात पर निर्भर करता है कि तुम आज क्या करते हो।',
+      'author': 'Mahatma Gandhi',
+    },
+    {
+      'english': 'Dream big and dare to fail.',
+      'hindi': 'बड़े सपने देखो और असफल होने का साहस रखो।',
+      'author': 'Norman Vaughan',
+    },
+    {
+      'english': "It always seems impossible until it's done.",
+      'hindi': 'कोई भी काम तब तक असंभव लगता है जब तक वो पूरा नहीं हो जाता।',
+      'author': 'Nelson Mandela',
+    },
+    {
+      'english': 'Push yourself, because no one else is going to do it for you.',
+      'hindi': 'खुद को आगे बढ़ाओ, क्योंकि यह काम कोई और तुम्हारे लिए नहीं करेगा।',
       'author': '',
     },
     {
-      'english': 'When you make a decision, the universe conspires to make it happen.',
-      'hindi': 'जब आप कोई फैसला कर लें, तो ब्रह्मांड उसे पूरा करने की साजिश करने लगता है।',
-      'author': 'Ralph Waldo Emerson',
-    },
-    {
-      'english': 'If we are not the part of solution, then we are the problem.',
-      'hindi': 'अगर हम हल का हिस्सा नहीं हैं, तो हम ही समस्या हैं।',
-      'author': 'Shiv Khera',
-    },
-    {
-      'english': 'A man is great by deeds, not by birth.',
-      'hindi': 'व्यक्ति अपने कर्मों से महान बनता है, जन्म से नहीं।',
-      'author': 'Chanakya',
-    },
-    {
-      'english': 'Start where you are today. Use what you have today. Do what you can today.',
-      'hindi': 'शुरुआत करो आज जहाँ आप हो। हर उस चीज का प्रयोग करो जो आज आपके पास है।',
-      'author': '',
+      'english': 'Discipline is the bridge between goals and accomplishment.',
+      'hindi': 'अनुशासन ही लक्ष्यों और उपलब्धि के बीच का पुल है।',
+      'author': 'Jim Rohn',
     },
   ];
 }

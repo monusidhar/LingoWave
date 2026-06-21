@@ -540,8 +540,8 @@ class Chapter21Data {
 
   /// Motivational quotes
   static const List<Map<String, String>> motivationalQuotes = [
-    {'english': 'The secret of getting ahead is getting started.', 'hindi': 'आगे बढ़ने का रहस्य है शुरुआत करना।'},
-    {'english': 'You can do anything, but not everything.', 'hindi': 'तुम कुछ भी कर सकते हो, पर सब कुछ नहीं।'},
-    {'english': 'Don\'t watch the clock; do what it does. Keep going.', 'hindi': 'घड़ी मत देखो; वो जो करती है वो करो। चलते रहो।'},
+    {'english': 'Little by little, one walks far.', 'hindi': 'थोड़ा-थोड़ा करके इंसान बहुत दूर तक चल जाता है।'},
+    {'english': 'Energy and persistence conquer all things.', 'hindi': 'ऊर्जा और दृढ़ता हर चीज़ को जीत लेती है।'},
+    {'english': 'Doubt kills more dreams than failure ever will.', 'hindi': 'संदेह असफलता से कहीं ज्यादा सपनों को मार देता है।'},
   ];
 }

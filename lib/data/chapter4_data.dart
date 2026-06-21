@@ -667,19 +667,19 @@ class Chapter4Data {
   // ── Motivational Quotes ────────────────────────────────────────────────────
   static const List<Map<String, String>> quotes = [
     {
-      'en': 'Definiteness of purpose is the starting point of all achievement.',
-      'hi': 'उद्देश्य का प्रबल होना सभी उपलब्धियों की पहली सीढ़ी है।',
-      'by': 'W. Clement Stone',
+      'en': 'Do not wait to strike till the iron is hot, but make it hot by striking.',
+      'hi': 'लोहा गर्म होने का इंतज़ार मत करो, बल्कि उस पर चोट करके उसे गर्म कर दो।',
+      'by': 'William Butler Yeats',
     },
     {
-      'en': 'Fortune favors the brave.',
-      'hi': 'किस्मत बहादुरों का साथ देती है।',
-      'by': 'Latin Proverb',
+      'en': 'A dream does not become reality through magic; it takes sweat, determination and hard work.',
+      'hi': 'सपना जादू से सच नहीं होता; इसके लिए पसीना, दृढ़ निश्चय और कड़ी मेहनत चाहिए।',
+      'by': 'Colin Powell',
     },
     {
-      'en': 'In most cases, you will have to fight a battle more than once to win it.',
-      'hi': 'अधिकांशतः किसी लड़ाई को जीतने के लिए एक से अधिक बार लड़ना होगा।',
-      'by': '',
+      'en': 'The journey of a thousand miles begins with a single step.',
+      'hi': 'हज़ार मील की यात्रा एक ही कदम से शुरू होती है।',
+      'by': 'Lao Tzu',
     },
   ];
 }

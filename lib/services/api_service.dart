@@ -250,18 +250,46 @@ class ApiService {
     return {'success': false, 'message': data['message'] ?? 'Failed'};
   }
 
-  // add coins
-  static Future<void> addCoins(int amount) async {
+  // add coins — returns the user's new backend balance, or null on failure.
+  static Future<int?> addCoins(int amount) async {
     try {
-      await http
+      final res = await http
           .post(
             Uri.parse('$baseUrl/coins/add'),
             headers: await _authHeaders(),
             body: jsonEncode({'amount': amount}),
           )
           .timeout(const Duration(seconds: 5));
+      if (res.statusCode == 200 || res.statusCode == 201) {
+        final data = jsonDecode(res.body);
+        return data['coins'] as int?;
+      }
+      return null;
     } catch (e) {
       _log('Add coins error: $e');
+      return null;
+    }
+  }
+
+  // deduct coins — the backend re-checks the balance. Returns
+  // {success, coins}; success is false if the user doesn't have enough.
+  static Future<Map<String, dynamic>> deductCoins(int amount) async {
+    try {
+      final res = await http
+          .post(
+            Uri.parse('$baseUrl/coins/deduct'),
+            headers: await _authHeaders(),
+            body: jsonEncode({'amount': amount}),
+          )
+          .timeout(const Duration(seconds: 5));
+      if (res.statusCode == 200 || res.statusCode == 201) {
+        final data = jsonDecode(res.body);
+        return {'success': data['success'] ?? true, 'coins': data['coins']};
+      }
+      return {'success': false};
+    } catch (e) {
+      _log('Deduct coins error: $e');
+      return {'success': false};
     }
   }
 

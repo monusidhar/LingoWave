@@ -324,10 +324,10 @@ class Chapter37Data {
   ];
 
   static const List<Map<String, String>> motivationalQuotes = [
-    {'english': 'The measure of who we are is what we do with what we have.', 'hindi': 'हम कौन हैं इसकी माप यह है कि हम जो पास है उससे क्या करते हैं।'},
-    {'english': 'I find that the harder I work, the more luck I seem to have.', 'hindi': 'मुझे लगता है कि मैं जितनी मेहनत करता हूँ, उतना अधिक भाग्यशाली लगता हूँ।'},
-    {'english': 'Not everything that can be counted counts; and not everything that counts can be counted.', 'hindi': 'हर वो चीज़ जो गिनी जा सकती है जरूरी नहीं; और हर जरूरी चीज़ गिनी नहीं जा सकती।'},
-    {'english': 'Winners are those who learn from their failures.', 'hindi': 'विजेता वे होते हैं जो अपनी असफलताओं से सीखते हैं।'},
-    {'english': 'Even thousands of stars can\'t replace the Moon; Similarly thousands of ordinary men can\'t replace an extraordinary man.', 'hindi': 'हजारों तारे भी चाँद की जगह नहीं ले सकते; उसी तरह हजारों साधारण लोग एक असाधारण व्यक्ति की जगह नहीं ले सकते।'},
+    {'english': 'Success is not final, failure is not fatal: it is the courage to continue that counts.', 'hindi': 'सफलता अंतिम नहीं है, असफलता घातक नहीं है: मायने तो आगे बढ़ते रहने का साहस रखता है।'},
+    {'english': 'The only place where success comes before work is in the dictionary.', 'hindi': 'सफलता काम से पहले सिर्फ शब्दकोश में आती है।'},
+    {'english': 'Don\'t be afraid to give up the good to go for the great.', 'hindi': 'महान पाने के लिए अच्छे को छोड़ने से मत डरो।'},
+    {'english': 'Perseverance is not a long race; it is many short races one after another.', 'hindi': 'दृढ़ता एक लंबी दौड़ नहीं है; यह एक के बाद एक कई छोटी दौड़ें हैं।'},
+    {'english': 'What you get by achieving your goals is not as important as what you become.', 'hindi': 'अपने लक्ष्य पाकर तुम जो हासिल करते हो, उससे ज्यादा महत्वपूर्ण है कि तुम क्या बन जाते हो।'},
   ];
 }

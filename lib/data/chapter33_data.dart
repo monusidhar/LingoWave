@@ -109,29 +109,29 @@ class Chapter33Data {
 
   static const List<Map<String, String>> motivationalQuotes = [
     {
-      'english': 'A man is a product of his thoughts — what he thinks, he becomes.',
-      'hindi': 'व्यक्ति अपने विचारों का एक प्राणी है, वह जैसा सोचता है वैसा ही बन जाता है।',
-      'author': 'Mahatma Gandhi',
+      'english': 'An investment in knowledge pays the best interest.',
+      'hindi': 'ज्ञान में किया गया निवेश सबसे अच्छा ब्याज देता है।',
+      'author': 'Benjamin Franklin',
     },
     {
-      'english': 'Our dream can come true if we have a firm desire to materialize them.',
-      'hindi': 'हमारा सपना साकार हो सकता है अगर हमारे अन्दर उन्हें पूरा करने की प्रबल इच्छा हो।',
-      'author': '',
+      'english': 'Strength does not come from winning. Your struggles develop your strength.',
+      'hindi': 'ताकत जीतने से नहीं आती; तुम्हारे संघर्ष ही तुम्हारी ताकत बनाते हैं।',
+      'author': 'Arnold Schwarzenegger',
     },
     {
-      'english': 'Be the change that you want to see in the world.',
-      'hindi': 'पहले खुद में ये बदलाव कीजिए जो बदलाव आप दुनिया में देखना चाहते हैं।',
-      'author': 'Mahatma Gandhi',
+      'english': 'The mind is everything. What you think you become.',
+      'hindi': 'मन ही सब कुछ है। तुम जो सोचते हो वही बन जाते हो।',
+      'author': 'Buddha',
     },
     {
-      'english': 'Your talent is nothing without opportunity.',
-      'hindi': 'बिना मौके के आपकी प्रतिभा कुछ भी नहीं है।',
-      'author': '',
+      'english': 'Knowing is not enough; we must apply. Willing is not enough; we must do.',
+      'hindi': 'जानना काफी नहीं, हमें उसे लागू करना होगा। चाहना काफी नहीं, हमें करना होगा।',
+      'author': 'Bruce Lee',
     },
     {
-      'english': 'Education is the weapon that can be used to change the world.',
-      'hindi': 'शिक्षा वह हथियार है जिसका प्रयोग कर दुनिया को बदला जा सकता है।',
-      'author': '',
+      'english': 'The roots of education are bitter, but the fruit is sweet.',
+      'hindi': 'शिक्षा की जड़ें कड़वी होती हैं, पर उसका फल मीठा होता है।',
+      'author': 'Aristotle',
     },
   ];
 
