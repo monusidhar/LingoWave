@@ -7,7 +7,7 @@ import 'dart:async';
 class ApiService {
   // static const String baseUrl = 'http://192.168.1.2:3000'; // Android emulator
   static const String baseUrl =
-      'https://lingowave-backend-production.up.railway.app'; // Android emulator
+      'https://lingowave-backend-production-132d.up.railway.app';
 
   static const String _tokenKey = 'auth_token';
   static const String _userKey = 'auth_user';
