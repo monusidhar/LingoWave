@@ -23,18 +23,38 @@ void main() async {
     ),
   );
 
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+  try {
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+  } catch (e) {
+    debugPrint('Firebase init failed: $e');
+  }
 
-  // ── Init Subscription FIRST ───────────────────────────
-  await SubscriptionService().initialize();
+  // None of the services below are critical to showing the UI. Guard each one
+  // with a try/catch + timeout so a failure or hang (common on release builds:
+  // FCM token fetch, billing, ads) can never freeze the app on the splash.
+  try {
+    await SubscriptionService()
+        .initialize()
+        .timeout(const Duration(seconds: 8));
+  } catch (e) {
+    debugPrint('Subscription init failed: $e');
+  }
 
-  // ── AdMob Init ────────────────────────────────────────
-  await AdService().initialize();
+  try {
+    await AdService().initialize().timeout(const Duration(seconds: 8));
+  } catch (e) {
+    debugPrint('Ad init failed: $e');
+  }
 
-  // ── Notifications Init ────────────────────────────────
-  await NotificationService().initialize();
+  try {
+    await NotificationService()
+        .initialize()
+        .timeout(const Duration(seconds: 8));
+  } catch (e) {
+    debugPrint('Notification init failed: $e');
+  }
 
   runApp(const LingoWaveApp());
 }

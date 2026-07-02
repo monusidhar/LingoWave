@@ -38,15 +38,28 @@ class _SplashScreenState extends State<SplashScreen>
     await Future.delayed(const Duration(milliseconds: 2000));
     if (!mounted) return;
 
-    final isLoggedIn = await ApiService.isLoggedIn();
+    bool isLoggedIn = false;
+    try {
+      isLoggedIn = await ApiService.isLoggedIn();
+    } catch (_) {
+      isLoggedIn = false;
+    }
 
     if (isLoggedIn) {
       // Streak is updated by HomeScreen._loadAll() right after navigation, so
       // we don't call updateStreak() here too (it would hit the endpoint twice
       // on every launch). Just (re)schedule the daily reminder.
-      await NotificationService().scheduleDailyStreakReminder();
+      //
+      // Fire-and-forget: scheduling notifications must NEVER block navigation,
+      // or a failure here leaves the app stuck on the splash screen.
+      NotificationService().scheduleDailyStreakReminder().catchError((_) {});
 
-      final userName = await ProgressService.loadUserName();
+      String userName = '';
+      try {
+        userName = await ProgressService.loadUserName();
+      } catch (_) {
+        userName = '';
+      }
       if (!mounted) return;
       Navigator.of(context).pushReplacement(
         PageRouteBuilder(
