@@ -163,6 +163,15 @@ class ProgressService {
     return prefs.getInt(_totalXpKey) ?? 0;
   }
 
+  // ─── Bonus XP (speaking practice etc.) — adds to the total and counts as
+  //     activity for the streak, without touching any lesson's status ────────
+  static Future<void> addBonusXP(int xp) async {
+    final prefs = await SharedPreferences.getInstance();
+    final currentTotal = prefs.getInt(_totalXpKey) ?? 0;
+    await prefs.setInt(_totalXpKey, currentTotal + xp);
+    await _updateStreak(prefs);
+  }
+
   static Future<int> loadStreak() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getInt(_streakKey) ?? 0;

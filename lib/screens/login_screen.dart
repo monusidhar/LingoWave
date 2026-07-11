@@ -6,6 +6,7 @@ import '../services/api_service.dart';
 import '../services/progress_service.dart';
 import '../services/ad_service.dart';
 import '../services/notification_service.dart';
+import '../services/speech_service.dart';
 import 'onboarding_screen.dart';
 import './home_screen.dart';
 import '../services/subscription_service.dart';
@@ -122,6 +123,15 @@ class _LoginScreenState extends State<LoginScreen>
         await ProgressService.restoreProgressFromBackend(progressData);
       }
     }
+
+    // ── Restore speaking-practice ✓ marks from backend ──
+    try {
+      final speakingResult = await ApiService.getSpeakingProgress();
+      if (speakingResult['success'] && speakingResult['data'] != null) {
+        await SpeechService().restorePracticedFromBackend(
+            speakingResult['data'] as List<dynamic>);
+      }
+    } catch (_) {}
 
     // ── Load user name ─────────────────────────────────
     final userName = user?['name'] ?? 'दोस्त';

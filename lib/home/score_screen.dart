@@ -6,9 +6,11 @@ import '../widgets/common_widgets.dart';
 import '../services/ad_service.dart';
 import '../services/progress_service.dart';
 import '../services/api_service.dart';
+import '../services/sound_service.dart';
 import '../services/subscription_service.dart';
 import '../data/chapter1_data.dart';
 import 'chapter_detail_screen.dart';
+import 'speaking_exercise.dart';
 
 class ScoreScreen extends StatefulWidget {
   final int score, total, xpEarned;
@@ -108,6 +110,7 @@ class _ScoreScreenState extends State<ScoreScreen>
     Future.delayed(const Duration(milliseconds: 200), () => _sa.forward());
     if (_ip || _ipa) {
       Future.delayed(const Duration(milliseconds: 300), () => _cc.play());
+      SoundService().playComplete();
     }
 
     // ── Save completion + unlock the next lesson IMMEDIATELY on quiz finish ──
@@ -593,6 +596,28 @@ class _ScoreScreenState extends State<ScoreScreen>
                         color: AppColors.success,
                         emoji: (_isCQ && !_isLastChapter) ? '🚀' : '📚',
                       ),
+                    // ── 🎤 Speaking practice (v2.0) — optional extra step
+                    //    after passing a regular lesson ─────────────────
+                    if (!_isCQ && _ipa) ...[
+                      const SizedBox(height: AppSpacing.md),
+                      PrimaryButton(
+                        label: 'बोलने का अभ्यास करें',
+                        emoji: '🎤',
+                        color: widget.accentColor,
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => SpeakingExerciseScreen(
+                                chapter: widget.chapter,
+                                lesson: widget.lesson,
+                                accentColor: widget.accentColor,
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ],
                     const SizedBox(height: AppSpacing.md),
                     GestureDetector(
                       onTap: () => Navigator.pop(context),

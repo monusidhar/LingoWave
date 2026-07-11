@@ -3,6 +3,8 @@
     <uses-permission android:name="android.permission.INTERNET"/>
     <!-- Required for FCM / local notifications to show on Android 13+ (API 33). -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
+    <!-- Speaking practice (v2.0): speech-to-text needs the microphone. -->
+    <uses-permission android:name="android.permission.RECORD_AUDIO"/>
 
     <application
         android:label="lingowave"
@@ -58,6 +60,10 @@
         <intent>
             <action android:name="android.intent.action.PROCESS_TEXT"/>
             <data android:mimeType="text/plain"/>
+        </intent>
+        <!-- Android 11+ package visibility for the speech recognizer. -->
+        <intent>
+            <action android:name="android.speech.RecognitionService"/>
         </intent>
     </queries>
 

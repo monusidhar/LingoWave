@@ -4,6 +4,7 @@ import '../models/lesson_model.dart';
 import '../widgets/common_widgets.dart';
 import '../services/progress_service.dart';
 import 'lesson_screen.dart';
+import 'speaking_exercise.dart';
 
 class ChapterDetailScreen extends StatefulWidget {
   /// Stable route name so other screens (e.g. ScoreScreen) can reliably pop
@@ -187,6 +188,97 @@ class _ChapterDetailScreenState extends State<ChapterDetailScreen>
                         total: widget.chapter.totalXP,
                       ),
                     ],
+                  ),
+                ),
+              ),
+            ),
+
+            // ── 🎤 Speaking Practice (v2.0) ─────────────────────────────
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(
+                    AppSpacing.lg, 0, AppSpacing.lg, AppSpacing.lg),
+                child: GestureDetector(
+                  onTap: () async {
+                    await Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => SpeakingExerciseScreen(
+                          chapter: widget.chapter,
+                          accentColor: color,
+                        ),
+                      ),
+                    );
+                    _loadProgress();
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.all(AppSpacing.md),
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [color, color.withOpacity(0.75)],
+                      ),
+                      borderRadius: BorderRadius.circular(AppRadius.lg),
+                      boxShadow: [
+                        BoxShadow(
+                          color: color.withOpacity(0.3),
+                          blurRadius: 14,
+                          offset: const Offset(0, 5),
+                        ),
+                      ],
+                    ),
+                    child: Row(
+                      children: [
+                        const Text('🎤', style: TextStyle(fontSize: 30)),
+                        const SizedBox(width: AppSpacing.md),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(children: [
+                                const Text(
+                                  'बोलने का अभ्यास',
+                                  style: TextStyle(
+                                    fontFamily: 'Nunito',
+                                    color: Colors.white,
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w800,
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 8, vertical: 2),
+                                  decoration: BoxDecoration(
+                                    color: AppColors.accentGold,
+                                    borderRadius: BorderRadius.circular(
+                                        AppRadius.full),
+                                  ),
+                                  child: const Text(
+                                    'नया',
+                                    style: TextStyle(
+                                      fontFamily: 'Nunito',
+                                      color: Colors.white,
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.w800,
+                                    ),
+                                  ),
+                                ),
+                              ]),
+                              const Text(
+                                'अंग्रेज़ी बोलकर देखें — ऐप आपका उच्चारण जाँचेगा!',
+                                style: TextStyle(
+                                  fontFamily: 'Nunito',
+                                  color: Colors.white70,
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const Icon(Icons.arrow_forward_ios_rounded,
+                            color: Colors.white, size: 16),
+                      ],
+                    ),
                   ),
                 ),
               ),

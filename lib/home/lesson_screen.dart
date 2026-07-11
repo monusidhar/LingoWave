@@ -6,7 +6,10 @@ import '../widgets/common_widgets.dart';
 import '../widgets/ad_widgets.dart';
 import '../services/progress_service.dart';
 import '../services/ad_service.dart';
-import 'quiz_screen.dart';
+import '../services/hearts_service.dart';
+import '../services/speech_service.dart';
+import '../exercises/exercise_session_screen.dart';
+import 'speaking_exercise.dart';
 
 import '../widgets/lesson/chapter1_widgets.dart';
 import '../widgets/lesson/chapter2_widgets.dart';
@@ -74,6 +77,7 @@ class _LessonScreenState extends State<LessonScreen>
   final FlutterTts _tts = FlutterTts();
   bool _ttsReady = false;
   String? _speakingText;
+  bool _speakingPracticeDone = false;
 
   late Chapter1Widgets  _ch1;
   late Chapter2Widgets  _ch2;
@@ -178,6 +182,7 @@ class _LessonScreenState extends State<LessonScreen>
     _fade = CurvedAnimation(parent: _animController, curve: Curves.easeOut);
     _animController.forward();
     _initTts();
+    _loadSpeakingPracticeStatus();
     _cw = LessonCommonWidgets(
         tts: _tts,
         speakingText: _speakingText,
@@ -261,7 +266,83 @@ class _LessonScreenState extends State<LessonScreen>
     super.dispose();
   }
 
+  /// 💔 Out of hearts: wait for the timed refill, watch an ad for a full
+  /// refill, or (implicitly) go premium for unlimited hearts.
+  Future<void> _showNoHeartsDialog() async {
+    final minutes = await HeartsService.minutesToNextHeart();
+    if (!mounted) return;
+    await showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(AppRadius.lg)),
+        title: const Text('💔 दिल खत्म हो गए!'),
+        content: Text(
+          'अगला दिल $minutes मिनट में मिलेगा।\n\n'
+          'विज्ञापन देखकर सभी ${HeartsService.maxHearts} दिल तुरंत भरें, '
+          'या Premium लेकर असीमित दिल पाएं।',
+          style: AppTextStyles.bodyMedium,
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('बाद में'),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              Navigator.pop(ctx);
+              await AdService().showRewarded(
+                onRewarded: () async {
+                  await HeartsService.refillFull();
+                  if (mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                          content: Text('❤️ सभी दिल भर गए! शुरू करें!')),
+                    );
+                  }
+                },
+                onComplete: () {},
+                onNotReady: () {
+                  if (mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                          content: Text(
+                              'विज्ञापन अभी तैयार नहीं है — थोड़ी देर बाद कोशिश करें।')),
+                    );
+                  }
+                },
+              );
+            },
+            child: const Text('📺 विज्ञापन देखें'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _loadSpeakingPracticeStatus() async {
+    final done = await SpeechService()
+        .isLessonPracticed(widget.chapter.id, widget.lesson.id);
+    if (mounted) setState(() => _speakingPracticeDone = done);
+  }
+
+  Future<void> _goToSpeakingPractice() async {
+    await Navigator.push(
+        context,
+        MaterialPageRoute(
+            builder: (_) => SpeakingExerciseScreen(
+                chapter: widget.chapter,
+                lesson: widget.lesson,
+                accentColor: widget.accentColor)));
+    _loadSpeakingPracticeStatus();
+  }
+
   void _goToQuiz() async {
+    // Step 5: hearts gate — free users need at least one heart to start.
+    if (!await HeartsService.canStartLesson()) {
+      if (mounted) _showNoHeartsDialog();
+      return;
+    }
     if (widget.lesson.status != LessonStatus.completed) {
       await ProgressService.completeLesson(
           chapterId: widget.chapter.id,
@@ -277,13 +358,17 @@ class _LessonScreenState extends State<LessonScreen>
         });
     }
     if (!mounted) return;
+    // v2.1: interactive sessions — WORD-level exercises in chapters 1-15,
+    // sentence-level after; chapter final quizzes stay pure authored MCQ.
     Navigator.push(
         context,
         MaterialPageRoute(
-            builder: (_) => QuizScreen(
+            builder: (_) => ExerciseSessionScreen(
                 chapter: widget.chapter,
                 lesson: widget.lesson,
-                accentColor: widget.accentColor)));
+                accentColor: widget.accentColor,
+                isChapterQuiz:
+                    _chapterQuizTypes.contains(widget.lesson.type))));
   }
 
   @override
@@ -340,7 +425,11 @@ class _LessonScreenState extends State<LessonScreen>
             SliverPadding(
                 padding: const EdgeInsets.fromLTRB(
                     AppSpacing.lg, 0, AppSpacing.lg, AppSpacing.xxl),
-                sliver: SliverToBoxAdapter(child: _buildQuizButton())),
+                sliver: SliverToBoxAdapter(
+                    child: Column(children: [
+                  _buildSpeakingPracticeButton(),
+                  _buildQuizButton(),
+                ]))),
           ])),
     );
   }
@@ -354,6 +443,48 @@ class _LessonScreenState extends State<LessonScreen>
         onTap: _goToQuiz,
         color: widget.accentColor,
         emoji: isCQ ? '🏆' : '📝');
+  }
+
+  /// 🎤 Per-lesson speaking practice (v2.0). Hidden on chapter quizzes.
+  /// Shows a ✓ state once this lesson's practice has been passed.
+  Widget _buildSpeakingPracticeButton() {
+    if (_chapterQuizTypes.contains(widget.lesson.type)) {
+      return const SizedBox.shrink();
+    }
+    final done = _speakingPracticeDone;
+    final color = done ? AppColors.success : widget.accentColor;
+    return Padding(
+      padding: const EdgeInsets.only(bottom: AppSpacing.md),
+      child: GestureDetector(
+        onTap: _goToSpeakingPractice,
+        child: Container(
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.lg, vertical: AppSpacing.md),
+          decoration: BoxDecoration(
+            color: color.withOpacity(0.06),
+            borderRadius: BorderRadius.circular(AppRadius.full),
+            border: Border.all(color: color.withOpacity(0.5), width: 2),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(done ? '✅' : '🎤', style: const TextStyle(fontSize: 18)),
+              const SizedBox(width: 8),
+              Flexible(
+                child: Text(
+                  done
+                      ? 'अभ्यास पूरा — फिर से बोलें'
+                      : 'इस पाठ का बोलने का अभ्यास',
+                  style: AppTextStyles.labelLarge
+                      .copyWith(color: color, fontSize: 15),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
   Widget _buildContent() {

@@ -190,6 +190,31 @@ class NotificationService {
     print('Daily streak reminder scheduled!');
   }
 
+  // ── Schedule Daily SRS Review Reminder (Step 4) ─────────────────────────────
+  Future<void> scheduleDailyReviewReminder() async {
+    await _localNotifications.cancel(2);
+
+    await _localNotifications.periodicallyShow(
+      2,
+      '📆 आज का रिव्यू तैयार है!',
+      'सीखी हुई चीज़ें दोहराएं — 5 मिनट में याददाश्त पक्की करें।',
+      RepeatInterval.daily,
+      NotificationDetails(
+        android: AndroidNotificationDetails(
+          _channel.id,
+          _channel.name,
+          channelDescription: _channel.description,
+          importance: Importance.high,
+          priority: Priority.high,
+          icon: '@mipmap/ic_launcher',
+          color: const Color(0xFF4F46E5),
+        ),
+      ),
+      payload: 'srs_reminder',
+      androidScheduleMode: AndroidScheduleMode.inexact,
+    );
+  }
+
   // ── Cancel All Notifications ────────────────────────────────────────────────
   Future<void> cancelAll() async {
     await _localNotifications.cancelAll();

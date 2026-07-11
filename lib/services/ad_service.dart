@@ -33,6 +33,7 @@ class AdService {
   // ─── Interstitial frequency (free users only) ─────────────────────────────
   /// Show an interstitial once every N completed lessons.
   static const int interstitialEveryNLessons = 3;
+
   /// Never show two interstitials closer together than this (anti-stacking).
   static const Duration _minGapBetweenInterstitials = Duration(seconds: 60);
 

@@ -10,6 +10,12 @@ import '../screens/login_screen.dart';
 import '../screens/leaderboard_screen.dart';
 import '../services/ad_service.dart';
 import '../services/subscription_service.dart';
+import '../services/hearts_service.dart';
+import '../services/review_service.dart';
+import '../widgets/path/chapter_path.dart';
+import '../services/srs_service.dart';
+import '../exercises/review_session_screen.dart';
+import '../exercises/srs_session_screen.dart';
 import '../screens/premium_screen.dart';
 
 
@@ -35,6 +41,15 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   int _coinsBackend = 0;
   int _completedLessonsBackend = 0;
   int _levelBackend = 1;
+
+  /// Pending "practice your mistakes" items (Step 3) — drives the Home tile.
+  int _pendingMistakes = 0;
+
+  /// Items due for spaced-repetition review today (Step 4).
+  int _dueReviews = 0;
+
+  /// ❤️ Current hearts (Step 5).
+  int _hearts = HeartsService.maxHearts;
 
   late AnimationController _headerAnim;
   late Animation<double> _headerFade;
@@ -101,6 +116,15 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       final data = statsResult['data'];
       _completedLessonsBackend = data['completedLessons'] ?? 0;
     }
+
+    // ── Pending mistakes for the review tile (Step 3) ────
+    _pendingMistakes = await ReviewService.pendingCount();
+
+    // ── Due SRS reviews (Step 4) ─────────────────────────
+    _dueReviews = await SrsService.dueCount();
+
+    // ── Hearts (Step 5) ──────────────────────────────────
+    _hearts = await HeartsService.current();
 
     // ── Optionally: update local progress with backend data here ──
     // (Implement if you want offline support, otherwise skip)
@@ -362,7 +386,34 @@ bool _isChapterAccessible(int listIndex) {
                                 ),
                               ],
                             ),
-                            StreakBadge(streak: _streak),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              children: [
+                                StreakBadge(streak: _streak),
+                                const SizedBox(height: 6),
+                                // ❤️ Hearts (Step 5) — ∞ for premium.
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 12, vertical: 6),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white.withOpacity(0.2),
+                                    borderRadius:
+                                        BorderRadius.circular(AppRadius.full),
+                                  ),
+                                  child: Text(
+                                    SubscriptionService().isPremium
+                                        ? '❤️ ∞'
+                                        : '❤️ $_hearts',
+                                    style: const TextStyle(
+                                      fontFamily: 'Nunito',
+                                      color: Colors.white,
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
                           ],
                         ),
                         const SizedBox(height: AppSpacing.lg),
@@ -575,6 +626,166 @@ bool _isChapterAccessible(int listIndex) {
 
         const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.lg)),
 
+        // ── 📆 Daily SRS review tile (Step 4) — only when items are due ──
+        if (_dueReviews > 0)
+          SliverPadding(
+            padding: const EdgeInsets.fromLTRB(
+                AppSpacing.lg, 0, AppSpacing.lg, AppSpacing.lg),
+            sliver: SliverToBoxAdapter(
+              child: GestureDetector(
+                onTap: () async {
+                  await Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (_) => const SrsSessionScreen()),
+                  );
+                  _loadAll();
+                },
+                child: Container(
+                  padding: const EdgeInsets.all(AppSpacing.md),
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      colors: [AppColors.primary, Color(0xFF7C3AED)],
+                    ),
+                    borderRadius: BorderRadius.circular(AppRadius.lg),
+                    boxShadow: [
+                      BoxShadow(
+                        color: AppColors.primary.withOpacity(0.3),
+                        blurRadius: 14,
+                        offset: const Offset(0, 5),
+                      ),
+                    ],
+                  ),
+                  child: Row(children: [
+                    const Text('📆', style: TextStyle(fontSize: 30)),
+                    const SizedBox(width: AppSpacing.md),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: const [
+                          Text(
+                            'आज का रिव्यू',
+                            style: TextStyle(
+                              fontFamily: 'Nunito',
+                              color: Colors.white,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                          Text(
+                            'सीखा हुआ दोहराएं — हमेशा याद रहेगा',
+                            style: TextStyle(
+                              fontFamily: 'Nunito',
+                              color: Colors.white70,
+                              fontSize: 12,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 12, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.25),
+                        borderRadius: BorderRadius.circular(AppRadius.full),
+                      ),
+                      child: Text(
+                        '$_dueReviews',
+                        style: const TextStyle(
+                          fontFamily: 'Nunito',
+                          color: Colors.white,
+                          fontWeight: FontWeight.w800,
+                          fontSize: 16,
+                        ),
+                      ),
+                    ),
+                  ]),
+                ),
+              ),
+            ),
+          ),
+
+        // ── 🔁 Practice Mistakes tile (Step 3) — only when there are any ──
+        if (_pendingMistakes > 0)
+          SliverPadding(
+            padding: const EdgeInsets.fromLTRB(
+                AppSpacing.lg, 0, AppSpacing.lg, AppSpacing.lg),
+            sliver: SliverToBoxAdapter(
+              child: GestureDetector(
+                onTap: () async {
+                  await Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (_) => const ReviewSessionScreen()),
+                  );
+                  _loadAll();
+                },
+                child: Container(
+                  padding: const EdgeInsets.all(AppSpacing.md),
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      colors: [AppColors.warning, Color(0xFFFF8E53)],
+                    ),
+                    borderRadius: BorderRadius.circular(AppRadius.lg),
+                    boxShadow: [
+                      BoxShadow(
+                        color: AppColors.warning.withOpacity(0.3),
+                        blurRadius: 14,
+                        offset: const Offset(0, 5),
+                      ),
+                    ],
+                  ),
+                  child: Row(children: [
+                    const Text('🔁', style: TextStyle(fontSize: 30)),
+                    const SizedBox(width: AppSpacing.md),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            'गलतियों का अभ्यास',
+                            style: TextStyle(
+                              fontFamily: 'Nunito',
+                              color: Colors.white,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                          const Text(
+                            'जो गलत हुआ, उसे दोहराकर पक्का करें',
+                            style: TextStyle(
+                              fontFamily: 'Nunito',
+                              color: Colors.white70,
+                              fontSize: 12,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 12, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.25),
+                        borderRadius: BorderRadius.circular(AppRadius.full),
+                      ),
+                      child: Text(
+                        '$_pendingMistakes',
+                        style: const TextStyle(
+                          fontFamily: 'Nunito',
+                          color: Colors.white,
+                          fontWeight: FontWeight.w800,
+                          fontSize: 16,
+                        ),
+                      ),
+                    ),
+                  ]),
+                ),
+              ),
+            ),
+          ),
+
         // ── Section Title ────────────────────────────────────────────────
         SliverPadding(
           padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
@@ -585,37 +796,31 @@ bool _isChapterAccessible(int listIndex) {
 
         const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.md)),
 
-        // ── Chapter Cards ────────────────────────────────────────────────
+        // ── 🗺️ Chapter Path (Step 5) — winding skill-tree of chapters ──
         SliverPadding(
           padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
-          sliver: SliverList(
-            delegate: SliverChildBuilderDelegate(
-              (context, i) {
-                final accessible = _isChapterAccessible(i);
-                return ChapterCard(
-                  chapter: _chapters[i],
-                  colorIndex: i,
-                  // Force locked appearance for inaccessible chapters
-                  forceShowLocked: !accessible,
-                  onTap: accessible
-                      ? () async {
-                          await Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              settings: const RouteSettings(
-                                  name: ChapterDetailScreen.routeName),
-                              builder: (_) => ChapterDetailScreen(
-                                chapter: _chapters[i],
-                                colorIndex: i,
-                              ),
-                            ),
-                          );
-                          _loadAll(); // refresh after returning
-                        }
-                      : () => _showUnlockChapterDialog(_chapters[i]),
-                );
+          sliver: SliverToBoxAdapter(
+            child: ChapterPath(
+              chapters: _chapters,
+              isAccessible: _isChapterAccessible,
+              onChapterTap: (chapter, i) async {
+                if (_isChapterAccessible(i)) {
+                  await Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      settings: const RouteSettings(
+                          name: ChapterDetailScreen.routeName),
+                      builder: (_) => ChapterDetailScreen(
+                        chapter: chapter,
+                        colorIndex: i,
+                      ),
+                    ),
+                  );
+                  _loadAll(); // refresh after returning
+                } else {
+                  _showUnlockChapterDialog(chapter);
+                }
               },
-              childCount: _chapters.length,
             ),
           ),
         ),

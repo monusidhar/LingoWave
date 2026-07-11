@@ -415,4 +415,55 @@ static Future<bool> getPremiumStatus() async {
     return false;
   }
 }
+
+  // ── Speaking practice sync (v2.0) ──────────────────────────────────────
+
+  /// Record a passed speaking session for a lesson on the server.
+  static Future<Map<String, dynamic>> completeSpeaking({
+    required int chapterId,
+    required int lessonId,
+    int score = 0,
+  }) async {
+    try {
+      final res = await http
+          .post(
+            Uri.parse('$baseUrl/lessons/speaking/complete'),
+            headers: await _authHeaders(),
+            body: jsonEncode({
+              'chapterId': chapterId,
+              'lessonId': lessonId,
+              'score': score,
+            }),
+          )
+          .timeout(const Duration(seconds: 10));
+
+      if (res.statusCode == 200 || res.statusCode == 201) {
+        return {'success': true};
+      }
+      return {'success': false};
+    } catch (e) {
+      _log('Complete speaking error: $e');
+      return {'success': false};
+    }
+  }
+
+  /// Fetch all speaking completions (for restore-on-login).
+  static Future<Map<String, dynamic>> getSpeakingProgress() async {
+    try {
+      final res = await http
+          .get(
+            Uri.parse('$baseUrl/lessons/speaking/progress'),
+            headers: await _authHeaders(),
+          )
+          .timeout(const Duration(seconds: 10));
+
+      if (res.statusCode == 200) {
+        return {'success': true, 'data': jsonDecode(res.body)};
+      }
+      return {'success': false};
+    } catch (e) {
+      _log('Get speaking progress error: $e');
+      return {'success': false};
+    }
+  }
 }

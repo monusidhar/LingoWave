@@ -53,6 +53,7 @@ class _SplashScreenState extends State<SplashScreen>
       // Fire-and-forget: scheduling notifications must NEVER block navigation,
       // or a failure here leaves the app stuck on the splash screen.
       NotificationService().scheduleDailyStreakReminder().catchError((_) {});
+      NotificationService().scheduleDailyReviewReminder().catchError((_) {});
 
       String userName = '';
       try {
