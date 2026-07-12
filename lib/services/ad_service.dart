@@ -39,15 +39,19 @@ class AdService {
 
   // ─── AdMob Unit IDs ───────────────────────────────────────────────────────
   // ✅ Your real Ad Unit IDs from AdMob console
-  static const String bannerAdUnitId = 'ca-app-pub-2863444084543307/8619814553';
+  static const String bannerAdUnitId = 'ca-app-pub-2863444084543307/7375500082';
   static const String _interstitialAdId =
-      'ca-app-pub-2863444084543307/5768719696';
+      'ca-app-pub-2863444084543307/9319137146';
   // Real Rewarded ad unit ID from AdMob (LingoWave)
-  static const String _rewardedAdId = 'ca-app-pub-2863444084543307/7590837090';
+  static const String _rewardedAdId = 'ca-app-pub-2863444084543307/8866721322';
+  // Rewarded Interstitial ad unit ID (better monetization)
+  static const String _rewardedInterstitialAdId =
+      'ca-app-pub-2863444084543307/9618520049';
 
   // ─── Internal State ───────────────────────────────────────────────────────
   InterstitialAd? _interstitialAd;
   RewardedAd? _rewardedAd;
+  RewardedInterstitialAd? _rewardedInterstitialAd;
   bool _isInterstitialLoading = false;
   bool _isRewardedLoading = false;
   bool _isPremium = false;
